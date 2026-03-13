@@ -86,10 +86,10 @@ const ProductsPage = () => {
     if (!form.name.trim()) { toast.error("Product name is required"); return; }
     if (form.price <= 0) { toast.error("Price must be greater than 0"); return; }
     if (editingProduct) {
-      ProductService.update(editingProduct._id, { ...form });
+      ProductService.update(editingProduct._id, { ...form, images: form.images });
       toast.success("Product updated");
     } else {
-      ProductService.add({ ...form, vendorId: vendor!._id });
+      ProductService.add({ ...form, images: form.images, vendorId: vendor!._id });
       toast.success("Product added");
     }
     reload();
