@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ImagePlus, X, Camera } from "lucide-react";
+import { useRef } from "react";
 
 const categoryColors: Record<string, string> = {
   vaccine: "bg-success text-success-foreground",
@@ -23,7 +24,7 @@ const categoryColors: Record<string, string> = {
 
 const units = ["vial", "bag", "piece", "bottle", "box", "kg", "litre"];
 
-const emptyForm = { name: "", category: "vaccine" as ProductCategory, brand: "", description: "", quantity: 0, unit: "piece", price: 0 };
+const emptyForm = { name: "", category: "vaccine" as ProductCategory, brand: "", description: "", quantity: 0, unit: "piece", price: 0, images: [] as string[] };
 
 const ProductsPage = () => {
   const { vendor } = useAuth();
@@ -35,6 +36,8 @@ const ProductsPage = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const reload = () => {
     if (vendor) setProducts(ProductService.getByVendor(vendor._id));
@@ -58,18 +61,35 @@ const ProductsPage = () => {
   const openAdd = () => { setEditingProduct(null); setForm(emptyForm); setDialogOpen(true); };
   const openEdit = (p: Product) => {
     setEditingProduct(p);
-    setForm({ name: p.name, category: p.category, brand: p.brand || "", description: p.description || "", quantity: p.quantity, unit: p.unit, price: p.price });
+    setForm({ name: p.name, category: p.category, brand: p.brand || "", description: p.description || "", quantity: p.quantity, unit: p.unit, price: p.price, images: p.images || [] });
     setDialogOpen(true);
+  };
+
+  const handleImageFiles = (files: FileList | null) => {
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith("image/")) { toast.error(`"${file.name}" is not an image`); return; }
+      if (file.size > 5 * 1024 * 1024) { toast.error(`"${file.name}" exceeds 5MB limit`); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setForm(f => ({ ...f, images: [...f.images, e.target?.result as string] }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setForm(f => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
   };
 
   const handleSave = () => {
     if (!form.name.trim()) { toast.error("Product name is required"); return; }
     if (form.price <= 0) { toast.error("Price must be greater than 0"); return; }
     if (editingProduct) {
-      ProductService.update(editingProduct._id, { ...form });
+      ProductService.update(editingProduct._id, { ...form, images: form.images });
       toast.success("Product updated");
     } else {
-      ProductService.add({ ...form, vendorId: vendor!._id });
+      ProductService.add({ ...form, images: form.images, vendorId: vendor!._id });
       toast.success("Product added");
     }
     reload();
@@ -232,6 +252,51 @@ const ProductsPage = () => {
                 <Label>Price (₹)</Label>
                 <Input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))} />
               </div>
+            </div>
+            {/* Image Upload Section */}
+            <div className="space-y-2">
+              <Label>Product Images</Label>
+              <div className="flex gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
+                />
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
+                />
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <ImagePlus className="h-4 w-4 mr-2" />Upload Images
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()}>
+                  <Camera className="h-4 w-4 mr-2" />Take Photo
+                </Button>
+              </div>
+              {form.images.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {form.images.map((img, i) => (
+                    <div key={i} className="relative group aspect-square rounded-md overflow-hidden border">
+                      <img src={img} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">Upload multiple images (max 5MB each). Hover to remove.</p>
             </div>
           </div>
           <DialogFooter>
