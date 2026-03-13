@@ -1,0 +1,10 @@
+import { Navigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+
+const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn } = useAuth();
+  if (!isLoggedIn) return <Navigate to="/auth/login" replace />;
+  return <>{children}</>;
+};
+
+export default AuthGuard;
