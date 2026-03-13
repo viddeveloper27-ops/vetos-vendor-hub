@@ -27,6 +27,7 @@ export interface Product {
   quantity: number;
   unit: string;
   price: number;
+  images?: string[];
   createdAt?: string;
   updatedAt?: string;
 }
