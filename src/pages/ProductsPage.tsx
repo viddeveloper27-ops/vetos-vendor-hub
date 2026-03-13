@@ -61,8 +61,25 @@ const ProductsPage = () => {
   const openAdd = () => { setEditingProduct(null); setForm(emptyForm); setDialogOpen(true); };
   const openEdit = (p: Product) => {
     setEditingProduct(p);
-    setForm({ name: p.name, category: p.category, brand: p.brand || "", description: p.description || "", quantity: p.quantity, unit: p.unit, price: p.price });
+    setForm({ name: p.name, category: p.category, brand: p.brand || "", description: p.description || "", quantity: p.quantity, unit: p.unit, price: p.price, images: p.images || [] });
     setDialogOpen(true);
+  };
+
+  const handleImageFiles = (files: FileList | null) => {
+    if (!files) return;
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith("image/")) { toast.error(`"${file.name}" is not an image`); return; }
+      if (file.size > 5 * 1024 * 1024) { toast.error(`"${file.name}" exceeds 5MB limit`); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setForm(f => ({ ...f, images: [...f.images, e.target?.result as string] }));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setForm(f => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
   };
 
   const handleSave = () => {
