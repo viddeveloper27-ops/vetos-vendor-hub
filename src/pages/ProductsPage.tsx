@@ -24,7 +24,7 @@ const categoryColors: Record<string, string> = {
 
 const units = ["vial", "bag", "piece", "bottle", "box", "kg", "litre"];
 
-const emptyForm = { name: "", category: "vaccine" as ProductCategory, brand: "", description: "", quantity: 0, unit: "piece", price: 0 };
+const emptyForm = { name: "", category: "vaccine" as ProductCategory, brand: "", description: "", quantity: 0, unit: "piece", price: 0, images: [] as string[] };
 
 const ProductsPage = () => {
   const { vendor } = useAuth();
