@@ -253,6 +253,51 @@ const ProductsPage = () => {
                 <Input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))} />
               </div>
             </div>
+            {/* Image Upload Section */}
+            <div className="space-y-2">
+              <Label>Product Images</Label>
+              <div className="flex gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
+                />
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
+                />
+                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <ImagePlus className="h-4 w-4 mr-2" />Upload Images
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()}>
+                  <Camera className="h-4 w-4 mr-2" />Take Photo
+                </Button>
+              </div>
+              {form.images.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {form.images.map((img, i) => (
+                    <div key={i} className="relative group aspect-square rounded-md overflow-hidden border">
+                      <img src={img} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(i)}
+                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">Upload multiple images (max 5MB each). Hover to remove.</p>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
