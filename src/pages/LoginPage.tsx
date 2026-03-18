@@ -62,63 +62,78 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md animate-fade-in">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">
-            <span className="text-primary">Vet</span>OS Vendor
-          </CardTitle>
-          <CardDescription>Sign in with your phone number</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {step === "phone" ? (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  placeholder="Enter your registered phone"
-                  value={phone}
-                  onChange={e => setPhone(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleSendOtp()}
-                />
-              </div>
-              <Button className="w-full" onClick={handleSendOtp} disabled={loading}>
-                {loading ? "Sending..." : "Send OTP"}
-              </Button>
-            </>
-          ) : (
-            <>
-              <div className="rounded-md bg-muted p-3 text-sm text-muted-foreground">
-                {mockOtpHint}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="otp">Enter OTP</Label>
-                <Input
-                  id="otp"
-                  placeholder="4-digit OTP"
-                  maxLength={4}
-                  value={otp}
-                  onChange={e => setOtp(e.target.value)}
-                  onKeyDown={e => e.key === "Enter" && handleVerifyOtp()}
-                />
-              </div>
-              <Button className="w-full" onClick={handleVerifyOtp} disabled={loading}>
-                {loading ? "Verifying..." : "Verify & Login"}
-              </Button>
-              <Button variant="ghost" className="w-full" onClick={() => { setStep("phone"); setOtp(""); }}>
-                Change Phone Number
-              </Button>
-            </>
-          )}
-          <p className="text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link to="/auth/register" className="text-primary font-medium hover:underline">
-              Register
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6 font-sans">
+      <div className="w-full max-w-sm space-y-8 animate-fade-in">
+        <div className="text-center space-y-2">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-white shadow-lg mb-4">
+            <span className="text-3xl font-bold">D&J</span>
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Dogs & <span className="text-primary">Joys</span>
+          </h1>
+          <p className="text-muted-foreground font-medium">Vendor Hub</p>
+        </div>
+
+        <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold">Sign In</CardTitle>
+            <CardDescription>Enter your phone number to continue</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {step === "phone" ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-semibold">Phone Number</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+91 00000 00000"
+                    className="h-12 border-muted-foreground/20 focus:border-primary focus:ring-primary/20 bg-white"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleSendOtp()}
+                  />
+                </div>
+                <Button className="w-full h-12 text-base font-semibold shadow-md active:scale-95 transition-transform" onClick={handleSendOtp} disabled={loading}>
+                  {loading ? "Sending..." : "Send OTP"}
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="rounded-xl bg-primary/5 p-4 text-sm text-primary font-medium border border-primary/10">
+                  {mockOtpHint}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="otp" className="text-sm font-semibold">Enter OTP</Label>
+                  <Input
+                    id="otp"
+                    placeholder="Enter 4-digit OTP"
+                    maxLength={4}
+                    className="h-12 border-muted-foreground/20 focus:border-primary focus:ring-primary/20 text-center text-xl tracking-widest bg-white"
+                    value={otp}
+                    onChange={e => setOtp(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleVerifyOtp()}
+                  />
+                </div>
+                <Button className="w-full h-12 text-base font-semibold shadow-md active:scale-95 transition-transform" onClick={handleVerifyOtp} disabled={loading}>
+                  {loading ? "Verifying..." : "Verify & Login"}
+                </Button>
+                <Button variant="ghost" className="w-full h-12 text-sm font-medium hover:bg-primary/5" onClick={() => { setStep("phone"); setOtp(""); }}>
+                  Change Phone Number
+                </Button>
+              </>
+            )}
+            <div className="pt-4 text-center">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{" "}
+                <Link to="/auth/register" className="text-primary font-bold hover:underline">
+                  Register Now
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

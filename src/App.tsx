@@ -25,7 +25,7 @@ const App = () => (
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Navigate to="/auth/login" replace />} />
+            <Route path="/" element={<Navigate to="/products" replace />} />
             <Route path="/auth/login" element={<LoginPage />} />
             <Route path="/auth/register" element={<RegisterPage />} />
             <Route element={<AuthGuard><DashboardLayout /></AuthGuard>}>

@@ -1,6 +1,8 @@
 import { Vendor } from "@/types";
 
-const API_BASE = "http://localhost:4210";
+// const API_BASE = "http://localhost:4210";
+
+const API_BASE = "https://vetos-api-saloni.coderly.in";
 
 export const VendorService = {
   getAll: async (): Promise<Vendor[]> => {
