@@ -24,7 +24,11 @@ const categoryColors: Record<string, string> = {
 
 const units = ["vial", "bag", "piece", "bottle", "box", "kg", "litre"];
 
-const emptyForm = { name: "", category: "vaccine" as ProductCategory, brand: "", description: "", quantity: 0, unit: "piece", price: 0, images: [] as string[] };
+const emptyForm = { name: "", category: "vaccine" as ProductCategory, brand: "", description: "", quantity: 0, unit: "piece", price: 0 };
+
+type ImagePreview =
+  | { kind: "existing"; url: string }
+  | { kind: "new"; url: string; file: File };
 
 const ProductsPage = () => {
   const { vendor } = useAuth();
@@ -36,16 +40,33 @@ const ProductsPage = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<ImagePreview[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const reload = () => {
-    if (vendor) setProducts(ProductService.getByVendor(vendor._id));
+  const reload = async () => {
+    if (!vendor) return;
+    try {
+      const data = await ProductService.getByVendor(vendor._id);
+      setProducts(data);
+    } catch {
+      toast.error("Failed to load products");
+    }
   };
 
   useEffect(() => {
-    const t = setTimeout(() => { reload(); setLoading(false); }, 300);
-    return () => clearTimeout(t);
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      await reload();
+      if (!cancelled) setLoading(false);
+    };
+    if (vendor) load();
+    return () => {
+      cancelled = true;
+    };
   }, [vendor]);
 
   const filtered = useMemo(() => {
@@ -58,10 +79,21 @@ const ProductsPage = () => {
     return list;
   }, [products, categoryFilter, search]);
 
-  const openAdd = () => { setEditingProduct(null); setForm(emptyForm); setDialogOpen(true); };
+  const openAdd = () => {
+    setEditingProduct(null);
+    setForm(emptyForm);
+    setExistingImages([]);
+    setNewImageFiles([]);
+    setImagePreviews([]);
+    setDialogOpen(true);
+  };
   const openEdit = (p: Product) => {
     setEditingProduct(p);
-    setForm({ name: p.name, category: p.category, brand: p.brand || "", description: p.description || "", quantity: p.quantity, unit: p.unit, price: p.price, images: p.images || [] });
+    setForm({ name: p.name, category: p.category, brand: p.brand || "", description: p.description || "", quantity: p.quantity, unit: p.unit, price: p.price });
+    const urls = p.images || [];
+    setExistingImages(urls);
+    setNewImageFiles([]);
+    setImagePreviews(urls.map((url) => ({ kind: "existing", url })));
     setDialogOpen(true);
   };
 
@@ -70,39 +102,68 @@ const ProductsPage = () => {
     Array.from(files).forEach(file => {
       if (!file.type.startsWith("image/")) { toast.error(`"${file.name}" is not an image`); return; }
       if (file.size > 5 * 1024 * 1024) { toast.error(`"${file.name}" exceeds 5MB limit`); return; }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setForm(f => ({ ...f, images: [...f.images, e.target?.result as string] }));
-      };
-      reader.readAsDataURL(file);
+      const url = URL.createObjectURL(file);
+      setNewImageFiles((prev) => [...prev, file]);
+      setImagePreviews((prev) => [...prev, { kind: "new", url, file }]);
     });
   };
 
   const removeImage = (index: number) => {
-    setForm(f => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+    setImagePreviews((prev) => {
+      const target = prev[index];
+      if (!target) return prev;
+      if (target.kind === "existing") {
+        setExistingImages((imgs) => imgs.filter((u) => u !== target.url));
+      } else {
+        setNewImageFiles((files) => files.filter((f) => f !== target.file));
+        URL.revokeObjectURL(target.url);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const handleSave = () => {
     if (!form.name.trim()) { toast.error("Product name is required"); return; }
     if (form.price <= 0) { toast.error("Price must be greater than 0"); return; }
-    if (editingProduct) {
-      ProductService.update(editingProduct._id, { ...form, images: form.images });
-      toast.success("Product updated");
-    } else {
-      ProductService.add({ ...form, images: form.images, vendorId: vendor!._id });
-      toast.success("Product added");
-    }
-    reload();
-    setDialogOpen(false);
+    const run = async () => {
+      try {
+        if (editingProduct) {
+          await ProductService.update({
+            id: editingProduct._id,
+            data: { ...form },
+            existingImages,
+            imageFiles: newImageFiles,
+          });
+          toast.success("Product updated");
+        } else {
+          await ProductService.add({
+            product: { ...form, vendorId: vendor!._id } as any,
+            imageFiles: newImageFiles,
+          });
+          toast.success("Product added");
+        }
+        await reload();
+        setDialogOpen(false);
+      } catch (e: any) {
+        toast.error(e?.message || "Failed to save product");
+      }
+    };
+    run();
   };
 
   const handleDelete = () => {
-    if (deleteTarget) {
-      ProductService.delete(deleteTarget._id);
-      toast.success("Product deleted");
-      reload();
-      setDeleteTarget(null);
-    }
+    if (!deleteTarget) return;
+    const run = async () => {
+      try {
+        await ProductService.delete(deleteTarget._id);
+        toast.success("Product deleted");
+        await reload();
+        setDeleteTarget(null);
+      } catch (e: any) {
+        toast.error(e?.message || "Failed to delete product");
+      }
+    };
+    run();
   };
 
   if (loading) {
@@ -280,11 +341,11 @@ const ProductsPage = () => {
                   <Camera className="h-4 w-4 mr-2" />Take Photo
                 </Button>
               </div>
-              {form.images.length > 0 && (
+              {imagePreviews.length > 0 && (
                 <div className="grid grid-cols-4 gap-2 mt-2">
-                  {form.images.map((img, i) => (
+                  {imagePreviews.map((img, i) => (
                     <div key={i} className="relative group aspect-square rounded-md overflow-hidden border">
-                      <img src={img} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
+                      <img src={img.url} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => removeImage(i)}

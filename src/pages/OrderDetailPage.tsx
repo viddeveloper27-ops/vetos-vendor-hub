@@ -30,18 +30,34 @@ const OrderDetailPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (id) setOrder(OrderService.getById(id) || null);
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(t);
+    let cancelled = false;
+    const load = async () => {
+      if (!id) return;
+      setLoading(true);
+      try {
+        const data = await OrderService.getById(id);
+        if (!cancelled) setOrder(data);
+      } catch {
+        if (!cancelled) setOrder(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
-  const handleStatusChange = (status: OrderStatus) => {
+  const handleStatusChange = async (status: OrderStatus) => {
     if (!order) return;
-    OrderService.updateStatus(order._id, status);
-    setOrder({ ...order, status, updatedAt: new Date().toISOString() });
-    toast.success(`Order status updated to ${status}`);
+    try {
+      const updated = await OrderService.updateStatus(order._id, status);
+      setOrder(updated);
+      toast.success(`Order status updated to ${status}`);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to update status");
+    }
   };
 
   if (loading) {

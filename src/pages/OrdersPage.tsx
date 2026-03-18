@@ -31,11 +31,23 @@ const OrdersPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (vendor) setOrders(OrderService.getByVendor(vendor._id));
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(t);
+    let cancelled = false;
+    const load = async () => {
+      if (!vendor) return;
+      setLoading(true);
+      try {
+        const data = await OrderService.getByVendor(vendor._id);
+        if (!cancelled) setOrders(data);
+      } catch {
+        if (!cancelled) setOrders([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    if (vendor) load();
+    return () => {
+      cancelled = true;
+    };
   }, [vendor]);
 
   const filtered = useMemo(() => {

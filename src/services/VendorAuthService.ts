@@ -2,14 +2,17 @@ import { Vendor } from "@/types";
 import { VendorService } from "./VendorService";
 
 const STORAGE_KEY = "vetos_vendor";
+const API_BASE = "http://localhost:4210";
+
 let currentVendor: Vendor | null = null;
-let mockOtp: string | null = null;
 
 function loadFromStorage(): Vendor | null {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
     if (data) return JSON.parse(data);
-  } catch {}
+  } catch {
+    // ignore
+  }
   return null;
 }
 
@@ -18,36 +21,65 @@ function saveToStorage(vendor: Vendor | null) {
   else localStorage.removeItem(STORAGE_KEY);
 }
 
-// Initialize from storage
 currentVendor = loadFromStorage();
 
 export const VendorAuthService = {
   getCurrentVendor: (): Vendor | null => currentVendor,
 
-  sendOtp: (phone: string): { success: boolean; otp?: string; message: string } => {
-    const vendor = VendorService.getByPhone(phone);
-    if (!vendor) return { success: false, message: "No vendor found with this phone number." };
-    mockOtp = String(Math.floor(1000 + Math.random() * 9000));
-    return { success: true, otp: mockOtp, message: `OTP sent (for mock: ${mockOtp})` };
+  sendOtp: async (
+    phone: string
+  ): Promise<{ success: boolean; otp?: string; message: string }> => {
+    const vendor = await VendorService.getByPhone(phone);
+    if (!vendor) {
+      return { success: false, message: "No vendor found with this phone number." };
+    }
+
+    const res = await fetch(`${API_BASE}/vendor/otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, message: err.message || "Failed to send OTP" };
+    }
+
+    const data = await res.json();
+    return {
+      success: true,
+      otp: data.otp,
+      message: `OTP sent successfully (for dev: ${data.otp})`,
+    };
   },
 
-  verifyOtp: (phone: string, otp: string): { success: boolean; vendor?: Vendor; message: string } => {
-    if (otp !== mockOtp) return { success: false, message: "Invalid OTP. Please try again." };
-    const vendor = VendorService.getByPhone(phone);
-    if (!vendor) return { success: false, message: "Vendor not found." };
+  verifyOtp: async (
+    phone: string,
+    otp: string
+  ): Promise<{ success: boolean; vendor?: Vendor; message: string }> => {
+    const res = await fetch(`${API_BASE}/vendor/validate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, otp }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      return { success: false, message: err.message || "Failed to verify OTP" };
+    }
+
+    const data = await res.json();
+    const vendor = data.vendor as Vendor;
     currentVendor = vendor;
     saveToStorage(vendor);
-    mockOtp = null;
     return { success: true, vendor, message: "Login successful!" };
   },
 
-  updateCurrentVendor: (data: Partial<Vendor>) => {
+  updateCurrentVendor: async (data: Partial<Vendor>) => {
     if (!currentVendor) return null;
-    const updated = VendorService.update(currentVendor._id, data);
-    if (updated) {
-      currentVendor = updated;
-      saveToStorage(updated);
-    }
+    const updated = await VendorService.update(currentVendor._id, data);
+    currentVendor = updated;
+    saveToStorage(updated);
     return updated;
   },
 

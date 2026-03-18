@@ -22,16 +22,20 @@ const LoginPage = () => {
       toast.error("Please enter a valid phone number");
       return;
     }
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 300));
-    const result = VendorAuthService.sendOtp(phone);
-    setLoading(false);
-    if (result.success) {
-      setMockOtpHint(result.message);
-      setStep("otp");
-      toast.success(result.message);
-    } else {
-      toast.error(result.message);
+    try {
+      setLoading(true);
+      const result = await VendorAuthService.sendOtp(phone);
+      setLoading(false);
+      if (result.success) {
+        setMockOtpHint(result.message);
+        setStep("otp");
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (e) {
+      setLoading(false);
+      toast.error("Failed to send OTP");
     }
   };
 
@@ -40,16 +44,20 @@ const LoginPage = () => {
       toast.error("Please enter the OTP");
       return;
     }
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 300));
-    const result = VendorAuthService.verifyOtp(phone, otp);
-    setLoading(false);
-    if (result.success && result.vendor) {
-      login(result.vendor);
-      toast.success("Welcome back!");
-      navigate("/dashboard");
-    } else {
-      toast.error(result.message);
+    try {
+      setLoading(true);
+      const result = await VendorAuthService.verifyOtp(phone, otp);
+      setLoading(false);
+      if (result.success && result.vendor) {
+        login(result.vendor);
+        toast.success("Welcome back!");
+        navigate("/products");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (e) {
+      setLoading(false);
+      toast.error("Failed to verify OTP");
     }
   };
 

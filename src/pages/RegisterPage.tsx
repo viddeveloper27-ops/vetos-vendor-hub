@@ -22,28 +22,28 @@ const RegisterPage = () => {
       toast.error("Name and phone are required");
       return;
     }
-    if (VendorService.getByPhone(form.phone)) {
-      toast.error("A vendor with this phone already exists");
-      return;
+    try {
+      setLoading(true);
+      await VendorService.add({
+        name: form.name,
+        phone: form.phone,
+        email: form.email || undefined,
+        gstNumber: form.gstNumber || undefined,
+        address: {
+          street: form.street || undefined,
+          city: form.city || undefined,
+          state: form.state || undefined,
+          pincode: form.pincode || undefined,
+          country: form.country || undefined,
+        },
+      });
+      setLoading(false);
+      toast.success("Registration successful! Please login.");
+      navigate("/auth/login");
+    } catch (e: any) {
+      setLoading(false);
+      toast.error(e?.message || "Failed to register vendor");
     }
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 300));
-    VendorService.add({
-      name: form.name,
-      phone: form.phone,
-      email: form.email || undefined,
-      gstNumber: form.gstNumber || undefined,
-      address: {
-        street: form.street || undefined,
-        city: form.city || undefined,
-        state: form.state || undefined,
-        pincode: form.pincode || undefined,
-        country: form.country || undefined,
-      },
-    });
-    setLoading(false);
-    toast.success("Registration successful! Please login.");
-    navigate("/auth/login");
   };
 
   return (

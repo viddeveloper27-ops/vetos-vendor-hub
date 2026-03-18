@@ -30,16 +30,16 @@ const DashboardPage = () => {
     const timer = setTimeout(() => {
       if (vendor) {
         setProducts(ProductService.getByVendor(vendor._id));
-        setOrders(OrderService.getByVendor(vendor._id));
+        // setOrders(OrderService.getByVendor(vendor._id));
       }
       setLoading(false);
     }, 300);
     return () => clearTimeout(timer);
   }, [vendor]);
 
-  const pending = orders.filter(o => o.status === "PENDING").length;
-  const shipped = orders.filter(o => o.status === "SHIPPED").length;
-  const delivered = orders.filter(o => o.status === "DELIVERED").length;
+  const pending = orders?.filter(o => o.status === "PENDING").length;
+  const shipped = orders?.filter(o => o.status === "SHIPPED").length;
+  const delivered = orders?.filter(o => o.status === "DELIVERED").length;
   const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
 
   if (loading) {

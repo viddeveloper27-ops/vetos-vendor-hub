@@ -1,23 +1,56 @@
 import { Vendor } from "@/types";
-import { mockVendors } from "./mock-data";
 
-let vendors = [...mockVendors];
+const API_BASE = "http://localhost:4210";
 
 export const VendorService = {
-  getAll: () => [...vendors],
-  getById: (id: string) => vendors.find(v => v._id === id),
-  getByPhone: (phone: string) => vendors.find(v => v.phone === phone),
-  add: (vendor: Omit<Vendor, "_id">) => {
-    const newVendor: Vendor = { ...vendor, _id: `v${Date.now()}` };
-    vendors.push(newVendor);
-    return newVendor;
+  getAll: async (): Promise<Vendor[]> => {
+    const res = await fetch(`${API_BASE}/vendor/all`);
+    if (!res.ok) throw new Error("Failed to fetch vendors");
+    const data = await res.json();
+    return data.vendors as Vendor[];
   },
-  update: (id: string, data: Partial<Vendor>) => {
-    const idx = vendors.findIndex(v => v._id === id);
-    if (idx !== -1) {
-      vendors[idx] = { ...vendors[idx], ...data };
-      return vendors[idx];
+
+  getById: async (id: string): Promise<Vendor | null> => {
+    const res = await fetch(`${API_BASE}/vendor/all`);
+    if (!res.ok) throw new Error("Failed to fetch vendors");
+    const data = await res.json();
+    const vendors = data.vendors as Vendor[];
+    return vendors.find((v) => v._id === id) || null;
+  },
+
+  getByPhone: async (phone: string): Promise<Vendor | null> => {
+    const res = await fetch(`${API_BASE}/vendor/all`);
+    if (!res.ok) throw new Error("Failed to fetch vendors");
+    const data = await res.json();
+    const vendors = data.vendors as Vendor[];
+    return vendors.find((v) => v.phone === phone) || null;
+  },
+
+  add: async (vendor: Omit<Vendor, "_id">): Promise<Vendor> => {
+    const res = await fetch(`${API_BASE}/vendor/add`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vendor),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to create vendor");
     }
-    return null;
+    const data = await res.json();
+    return data.vendor as Vendor;
+  },
+
+  update: async (id: string, payload: Partial<Vendor>): Promise<Vendor> => {
+    const res = await fetch(`${API_BASE}/vendor/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || "Failed to update vendor");
+    }
+    const data = await res.json();
+    return data.vendor as Vendor;
   },
 };
