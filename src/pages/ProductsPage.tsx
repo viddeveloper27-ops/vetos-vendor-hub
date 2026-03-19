@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
@@ -179,9 +179,11 @@ const ProductsPage = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-row justify-between items-center gap-4">
         <h1 className="text-2xl font-semibold">My Products</h1>
-        <Button onClick={openAdd}><Plus className="h-4 w-4 mr-2" />Add Product</Button>
+        <Button onClick={openAdd} size="sm" className="h-9 px-4 rounded-md shadow-sm font-medium transition-transform active:scale-95">
+          + Add
+        </Button>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -265,123 +267,179 @@ const ProductsPage = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}</DialogTitle>
+        <DialogContent className="max-w-full w-full h-[100vh] sm:h-[90vh] sm:max-w-2xl sm:rounded-2xl overflow-hidden flex flex-col p-0 gap-0 border-none sm:border shadow-2xl [&>button]:hidden">
+          <DialogHeader className="p-4 border-b bg-primary text-primary-foreground shrink-0 rounded-t-none sm:rounded-t-2xl flex flex-row items-center justify-start relative min-h-[60px]">
+            <DialogTitle className="text-xl font-bold">
+              {editingProduct ? "Edit Product" : "Add Product"}
+            </DialogTitle>
+            <DialogClose asChild>
+              <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-white/20 h-10 w-10 absolute right-2 bottom-2">
+                <X className="h-7 w-7" />
+              </Button>
+            </DialogClose>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Name *</Label>
-              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Category *</Label>
-                <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v as ProductCategory }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="vaccine">Vaccine</SelectItem>
-                    <SelectItem value="food">Food</SelectItem>
-                    <SelectItem value="accessory">Accessory</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Brand</Label>
-                <Input value={form.brand} onChange={e => setForm(f => ({ ...f, brand: e.target.value }))} />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Quantity</Label>
-                <Input type="number" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: Number(e.target.value) }))} />
-              </div>
-              <div className="space-y-2">
-                <Label>Unit</Label>
-                <Select value={form.unit} onValueChange={v => setForm(f => ({ ...f, unit: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {units.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Price (₹)</Label>
-                <Input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))} />
-              </div>
-            </div>
-            {/* Image Upload Section */}
-            <div className="space-y-2">
-              <Label>Product Images</Label>
-              <div className="flex gap-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
-                />
-                <input
-                  ref={cameraInputRef}
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                  onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
-                />
-                <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                  <ImagePlus className="h-4 w-4 mr-2" />Upload Images
-                </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => cameraInputRef.current?.click()}>
-                  <Camera className="h-4 w-4 mr-2" />Take Photo
-                </Button>
-              </div>
-              {imagePreviews.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 mt-2">
-                  {imagePreviews.map((img, i) => (
-                    <div key={i} className="relative group aspect-square rounded-md overflow-hidden border">
-                      <img src={img.url} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-slate-50/30">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-slate-700">Product Name *</Label>
+                  <Input
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20 bg-white"
+                    placeholder="e.g. Premium Dog Food"
+                  />
                 </div>
-              )}
-              <p className="text-xs text-muted-foreground">Upload multiple images (max 5MB each). Hover to remove.</p>
+
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Category *</Label>
+                    <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v as ProductCategory }))}>
+                      <SelectTrigger className="h-11 border-slate-200 bg-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="vaccine">Vaccine</SelectItem>
+                        <SelectItem value="food">Food</SelectItem>
+                        <SelectItem value="accessory">Accessory</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">Brand Name</Label>
+                    <Input
+                      value={form.brand}
+                      onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
+                      className="h-11 border-slate-200 bg-white"
+                      placeholder="e.g. Royal Canin"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold text-slate-700">Description</Label>
+                  <Textarea
+                    value={form.description}
+                    onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                    className="min-h-[120px] resize-none border-slate-200 bg-white"
+                    placeholder="Enter product details..."
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm space-y-6">
+                  <h3 className="font-semibold text-slate-800 border-b pb-2">Inventory & Pricing</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase text-slate-500">Unit</Label>
+                      <Select value={form.unit} onValueChange={v => setForm(f => ({ ...f, unit: v }))}>
+                        <SelectTrigger className="h-10 border-slate-200">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {units.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase text-slate-500">Price (₹)</Label>
+                      <Input
+                        type="number"
+                        value={form.price}
+                        onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
+                        className="h-10 border-slate-200 font-semibold text-primary"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold uppercase text-slate-500">Initial Stock Quantity</Label>
+                    <Input
+                      type="number"
+                      value={form.quantity}
+                      onChange={e => setForm(f => ({ ...f, quantity: Number(e.target.value) }))}
+                      className="h-10 border-slate-200"
+                    />
+                  </div>
+                </div>
+
+                {/* Image Upload Section */}
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold text-slate-700">Product Images</Label>
+                  <div className="flex flex-wrap gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
+                    />
+                    <input
+                      ref={cameraInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
+                    />
+                    <Button type="button" variant="outline" className="flex-1 h-11 border-dashed border-2 hover:border-primary hover:text-primary transition-all bg-white" onClick={() => fileInputRef.current?.click()}>
+                      <ImagePlus className="h-4 w-4 mr-2" />Upload
+                    </Button>
+                    <Button type="button" variant="outline" className="flex-1 h-11 border-dashed border-2 hover:border-primary hover:text-primary transition-all bg-white" onClick={() => cameraInputRef.current?.click()}>
+                      <Camera className="h-4 w-4 mr-2" />Camera
+                    </Button>
+                  </div>
+                  {imagePreviews.length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
+                      {imagePreviews.map((img, i) => (
+                        <div key={i} className="relative group aspect-square rounded-lg overflow-hidden border-2 border-slate-100 shadow-sm transition-transform active:scale-95">
+                          <img src={img.url} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(i)}
+                            className="absolute top-1 right-1 bg-destructive/90 text-destructive-foreground rounded-full p-1.5 shadow-lg active:scale-95"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-[10px] text-muted-foreground italic">Add up to 5 images. Tap "X" to remove.</p>
+                </div>
+              </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editingProduct ? "Update" : "Add"}</Button>
+
+          <DialogFooter className="p-4 border-t bg-white shrink-0 flex-row gap-3">
+            <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-10 text-slate-600 font-medium flex-1">Cancel</Button>
+            <Button onClick={handleSave} className="h-10 px-4 text-sm shadow-md active:scale-95 transition-transform flex-1">{editingProduct ? "Save Changes" : "Create Product"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Product</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{deleteTarget?.name}"? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Dialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
+        <DialogContent className="max-w-[calc(100vw-32px)] w-[360px] rounded-2xl p-6 gap-6 outline-none border-none shadow-2xl [&>button]:hidden">
+          <div className="space-y-4 text-center sm:text-left">
+            <h2 className="text-xl font-bold text-slate-900 leading-tight">Delete Product?</h2>
+            <p className="text-sm text-slate-500 leading-relaxed">
+              Are you sure you want to delete <span className="font-semibold text-slate-700">"{deleteTarget?.name}"</span>? This action is permanent and cannot be undone.
+            </p>
+          </div>
+          <div className="flex flex-row gap-3 mt-2">
+            <Button variant="outline" className="flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </Button>
+            <Button className="flex-1 h-11 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm" onClick={handleDelete}>
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
