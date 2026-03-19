@@ -13,6 +13,7 @@ export interface Vendor {
   email?: string;
   gstNumber?: string;
   address?: VendorAddress;
+  fcmToken?: string;
 }
 
 export type ProductCategory = "vaccine" | "food" | "accessory";
@@ -34,23 +35,43 @@ export interface Product {
 
 export interface OrderItem {
   productId: string;
-  name: string;
+  name?: string;
   quantity: number;
-  unit: string;
-  price: number;
+  unit?: string;
+  price?: number;
 }
 
-export type OrderStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+export type OrderStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "pending" | "accepted" | "rejected" | "shipped" | "delivered" | "cancelled";
 
 export interface Order {
   _id: string;
   vendorId: string;
-  customerName: string;
+  customerId?: string;
+  customerName?: string;
   customerPhone?: string;
+  customerMobile?: string;
   customerAddress?: string;
+  shippingAddress?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+    country?: string;
+  };
   items: OrderItem[];
   totalAmount: number;
   status: OrderStatus;
+  paymentMethod?: string;
+  paymentStatus?: string;
   createdAt: string;
   updatedAt?: string;
+}
+
+export interface Customer {
+  _id: string;
+  name: string;
+  phone?: string;
+  mobile?: string;
+  email?: string;
+  image?: string;
 }

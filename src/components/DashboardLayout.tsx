@@ -78,9 +78,76 @@ function AppSidebarContent() {
   );
 }
 
+import { messaging, requestForToken, onMessageListener } from "@/lib/firebase";
+import { useEffect } from "react";
+import { VendorService } from "@/services/VendorService";
+import { toast } from "sonner";
+
 const DashboardLayout = () => {
   const { vendor, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (vendor && vendor._id) {
+      const syncFcmToken = async (token: string) => {
+        try {
+          console.log(`[FCM Sync] Orchestrating sync for vendor: ${vendor._id}`);
+          const updatedVendor = await VendorService.update(vendor._id, { fcmToken: token });
+          console.log("[FCM Sync] Successfully stored token in database:", updatedVendor.fcmToken ? "YES" : "NO");
+          localStorage.removeItem("pending_fcm_token");
+          toast.success("Push notifications enabled");
+        } catch (err) {
+          console.error("[FCM Sync] Critical failure while saving token:", err);
+        }
+      };
+
+      // 1. Initial check for pending tokens from startup
+      const pending = localStorage.getItem("pending_fcm_token");
+      if (pending) {
+        console.log("Found pending FCM token from startup, syncing now...");
+        syncFcmToken(pending);
+      }
+
+      // 2. React to dynamic token injection
+      const handleTokenReceived = (e: any) => {
+        const token = e.detail;
+        if (token) {
+          console.log("New FCM token received dynamically:", token);
+          syncFcmToken(token);
+        }
+      };
+      window.addEventListener("fcmTokenReceived", handleTokenReceived);
+
+      // 3. Keep the bridge updated with the current vendor context
+      (window as any).setFCMToken = (token: string) => {
+        console.log("Native Bridge: Received FCM Token:", token);
+        syncFcmToken(token);
+      };
+      (window as any).setFcmTokenFromNative = (window as any).setFCMToken;
+
+      // 4. Web FCM Fallback
+      const handleWebFcm = async () => {
+        const token = await requestForToken();
+        if (token) {
+          console.log("Web FCM Token secured:", token);
+          syncFcmToken(token);
+        }
+      };
+      handleWebFcm();
+
+      // 5. Listen for foreground messages
+      onMessageListener().then((payload: any) => {
+        console.log("Notification received:", payload);
+        toast.info(payload.notification?.title || "New Notification", {
+          description: payload.notification?.body,
+        });
+      }).catch(err => console.log('FCM Listener failed: ', err));
+
+      return () => {
+        window.removeEventListener("fcmTokenReceived", handleTokenReceived);
+      };
+    }
+  }, [vendor]);
 
   const handleLogout = () => {
     logout();

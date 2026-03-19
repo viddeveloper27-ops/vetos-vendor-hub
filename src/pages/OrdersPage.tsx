@@ -52,12 +52,19 @@ const OrdersPage = () => {
 
   const filtered = useMemo(() => {
     let list = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    if (statusFilter !== "all") list = list.filter(o => o.status === statusFilter);
+    if (statusFilter !== "all") {
+      list = list.filter(o => o.status.toUpperCase() === statusFilter.toUpperCase());
+    }
     return list;
   }, [orders, statusFilter]);
 
   const paginated = filtered.slice(0, page * PAGE_SIZE);
   const hasMore = paginated.length < filtered.length;
+
+  const renderStatus = (status: string) => {
+    const s = status?.toUpperCase() || "PENDING";
+    return <Badge className={`${statusColors[s] || statusColors.PENDING}`}>{s}</Badge>;
+  };
 
   if (loading) {
     return (
@@ -67,6 +74,12 @@ const OrdersPage = () => {
       </div>
     );
   }
+
+  const getCustomerName = (o: Order) => {
+    if (o.customerName) return o.customerName;
+    if (o.customerId) return `Customer: ...${o.customerId.slice(-6)}`;
+    return "Unknown Customer";
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -102,12 +115,12 @@ const OrdersPage = () => {
                 <tbody>
                   {paginated.map(o => (
                     <tr key={o._id} className="border-b last:border-0 hover:bg-muted/50 cursor-pointer" onClick={() => navigate(`/orders/${o._id}`)}>
-                      <td className="p-4 font-medium">{o._id}</td>
-                      <td className="p-4">{o.customerName}</td>
-                      <td className="p-4 text-muted-foreground">{o.items.length} item{o.items.length > 1 ? "s" : ""}</td>
-                      <td className="p-4">₹{o.totalAmount.toLocaleString()}</td>
-                      <td className="p-4"><Badge className={statusColors[o.status]}>{o.status}</Badge></td>
-                      <td className="p-4 text-muted-foreground">{format(new Date(o.createdAt), "dd MMM yyyy")}</td>
+                      <td className="p-4 font-medium">...{o._id.slice(-8)}</td>
+                      <td className="p-4">{getCustomerName(o)}</td>
+                      <td className="p-4 text-muted-foreground">{o.items?.length || 0} item{(o.items?.length || 0) > 1 ? "s" : ""}</td>
+                      <td className="p-4">₹{o.totalAmount?.toLocaleString() || "0"}</td>
+                      <td className="p-4">{renderStatus(o.status)}</td>
+                      <td className="p-4 text-muted-foreground">{o.createdAt ? format(new Date(o.createdAt), "dd MMM yyyy") : "N/A"}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -120,13 +133,13 @@ const OrdersPage = () => {
               <Card key={o._id} className="cursor-pointer hover:bg-muted/30" onClick={() => navigate(`/orders/${o._id}`)}>
                 <CardContent className="p-4 space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-sm">{o._id}</span>
-                    <Badge className={statusColors[o.status]}>{o.status}</Badge>
+                    <span className="font-medium text-sm">...{o._id.slice(-8)}</span>
+                    {renderStatus(o.status)}
                   </div>
-                  <p className="text-sm">{o.customerName}</p>
+                  <p className="text-sm">{getCustomerName(o)}</p>
                   <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{o.items.length} items · ₹{o.totalAmount.toLocaleString()}</span>
-                    <span>{format(new Date(o.createdAt), "dd MMM")}</span>
+                    <span>{o.items?.length || 0} items · ₹{o.totalAmount?.toLocaleString() || "0"}</span>
+                    <span>{o.createdAt ? format(new Date(o.createdAt), "dd MMM") : "N/A"}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -142,5 +155,6 @@ const OrdersPage = () => {
     </div>
   );
 };
+
 
 export default OrdersPage;
