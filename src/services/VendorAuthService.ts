@@ -1,10 +1,11 @@
 import { Vendor } from "@/types";
 import { VendorService } from "./VendorService";
+import { API_URL } from "@/constants";
 
 const STORAGE_KEY = "vetos_vendor";
 // const API_BASE = "http://localhost:4210";
 
-const API_BASE = "https://vetos-api-saloni.coderly.in";
+const API_BASE = API_URL;
 
 let currentVendor: Vendor | null = null;
 

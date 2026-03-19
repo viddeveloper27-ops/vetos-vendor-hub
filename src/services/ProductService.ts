@@ -1,8 +1,9 @@
+import { API_URL } from "@/constants";
 import { Product } from "@/types";
 
 // const API_BASE = "http://localhost:4210";
 
-const API_BASE = "https://vetos-api-saloni.coderly.in";
+const API_BASE = API_URL;
 
 function appendIfDefined(fd: FormData, key: string, value: unknown) {
   if (value === undefined || value === null) return;
