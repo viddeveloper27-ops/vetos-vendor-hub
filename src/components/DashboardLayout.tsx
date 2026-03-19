@@ -56,16 +56,16 @@ function AppSidebarContent() {
             <SidebarMenu>
               {navItems.map(item => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="h-auto">
                     <NavLink
                       to={item.url}
                       end={item.url === "/dashboard"}
                       onClick={handleItemClick}
-                      className="hover:bg-primary/10 transition-colors"
+                      className="hover:bg-primary/10 transition-colors py-3 px-4 flex items-center w-full"
                       activeClassName="bg-primary text-white font-semibold shadow-sm"
                     >
-                      <item.icon className="mr-2 h-5 w-5" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <item.icon className="mr-3 h-6 w-6 shrink-0" />
+                      {!collapsed && <span className="text-base tracking-wide">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
