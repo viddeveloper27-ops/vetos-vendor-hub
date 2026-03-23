@@ -22,7 +22,7 @@ export const requestForToken = async () => {
   try {
     const currentToken = await getToken(messaging, {
       // Please provide your real VAPID key from Firebase Console -> Project Settings -> Cloud Messaging -> Web Configuration
-      // vapidKey: "YOUR_VAPID_KEY_HERE", 
+      vapidKey: "BOMIRiXJJ93opSFEwX4jLpBTCpLME3rVrqoVPMhc1R3OQAc-pp4pmWsV-MELECnFRbnkAmUnNoDxUv43E2873zg",
     });
     if (currentToken) {
       console.log("FCM Token:", currentToken);

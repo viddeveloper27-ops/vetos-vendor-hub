@@ -34,25 +34,27 @@ export interface Product {
 }
 
 export interface OrderItem {
-  productId: string;
+  productId: string | Product;
   name?: string;
   quantity: number;
   unit?: string;
   price?: number;
 }
 
-export type OrderStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "pending" | "accepted" | "rejected" | "shipped" | "delivered" | "cancelled";
+export type OrderStatus = "PENDING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
 
 export interface Order {
   _id: string;
   vendorId: string;
-  customerId?: string;
+  customerId?: string | Customer;
   customerName?: string;
   customerPhone?: string;
   customerMobile?: string;
   customerAddress?: string;
   shippingAddress?: {
+    houseNo?: string;
     street?: string;
+    landmark?: string;
     city?: string;
     state?: string;
     pincode?: string;

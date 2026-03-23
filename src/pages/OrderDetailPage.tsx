@@ -14,14 +14,13 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 const statusColors: Record<string, string> = {
   PENDING: "bg-warning text-warning-foreground",
-  ACCEPTED: "bg-success text-success-foreground",
-  REJECTED: "bg-destructive text-destructive-foreground",
+  CONFIRMED: "bg-info text-info-foreground",
   SHIPPED: "bg-primary text-primary-foreground",
   DELIVERED: "bg-success text-success-foreground",
   CANCELLED: "bg-muted text-muted-foreground",
 };
 
-const STATUSES: OrderStatus[] = ["PENDING", "ACCEPTED", "REJECTED", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUSES: OrderStatus[] = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
 
 const OrderDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,10 +37,13 @@ const OrderDetailPage = () => {
       setLoading(true);
       try {
         const data = await OrderService.getById(id);
-        if (!cancelled) {
+        if (!cancelled && data) {
           setOrder(data);
-          // Fetch customer if customerId exists
-          if (data?.customerId) {
+
+          // Use populated customer data if available, otherwise fetch it
+          if (data.customerId && typeof data.customerId === "object") {
+            setCustomer(data.customerId as Customer);
+          } else if (data.customerId && typeof data.customerId === "string") {
             setLoadingCustomer(true);
             const customerData = await CustomerService.getById(data.customerId);
             if (!cancelled) setCustomer(customerData);
@@ -91,11 +93,20 @@ const OrderDetailPage = () => {
     );
   }
 
-  const currentStatus = order.status?.toUpperCase() || "PENDING";
-  const displayAddress = order.customerAddress || 
-    (order.shippingAddress ? 
-      [order.shippingAddress.street, order.shippingAddress.city, order.shippingAddress.state, order.shippingAddress.pincode, order.shippingAddress.country]
-        .filter(Boolean).join(", ") 
+  const currentStatus = (typeof order.status === 'string' ? order.status.toUpperCase() : "PENDING");
+
+  const displayAddress = order.customerAddress ||
+    (order.shippingAddress ?
+      [
+        order.shippingAddress.houseNo,
+        order.shippingAddress.street,
+        order.shippingAddress.landmark,
+        order.shippingAddress.city,
+        order.shippingAddress.state,
+        order.shippingAddress.pincode,
+        order.shippingAddress.country
+      ]
+        .filter(Boolean).join(", ")
       : "No address provided");
 
   return (
@@ -140,9 +151,9 @@ const OrderDetailPage = () => {
                 <p className="font-medium leading-relaxed">{displayAddress}</p>
               </div>
             </div>
-            
+
             <Separator />
-            
+
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="space-y-1">
                 <p className="text-muted-foreground flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Payment Method</p>
@@ -150,11 +161,11 @@ const OrderDetailPage = () => {
               </div>
               <div className="space-y-1">
                 <p className="text-muted-foreground flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Status</p>
-                <Badge 
-                  variant="outline" 
-                  className={order.paymentStatus?.toUpperCase() === "PENDING" 
-                    ? "bg-warning/10 text-warning border-warning/20" 
-                    : "bg-success/10 text-success border-success/20"}
+                <Badge
+                  variant="outline"
+                  className={order.paymentStatus?.toUpperCase() === "PAID"
+                    ? "bg-success/10 text-success border-success/20"
+                    : "bg-warning/10 text-warning border-warning/20"}
                 >
                   {order.paymentStatus?.toUpperCase() || "PENDING"}
                 </Badge>
@@ -195,20 +206,32 @@ const OrderDetailPage = () => {
         </CardHeader>
         <CardContent>
           <div className="divide-y">
-            {order.items?.map((item, i) => (
-              <div key={i} className="flex justify-between items-center py-4">
-                <div className="space-y-1">
-                  <p className="font-medium text-sm">{item.name || `Product ID: ${item.productId}`}</p>
-                  <p className="text-xs text-muted-foreground">
-                    Qty: {item.quantity} {item.unit || ""}
-                    {item.price ? ` @ ₹${item.price.toLocaleString()}` : ""}
-                  </p>
+            {order.items?.map((item, i) => {
+              const product = typeof item.productId === 'object' ? item.productId : null;
+              const name = item.name || product?.name || `Product ID: ${item.productId}`;
+              const price = item.price || product?.price || 0;
+              const unit = item.unit || product?.unit || "";
+
+              return (
+                <div key={i} className="flex justify-between items-center py-4">
+                  <div className="flex gap-4 items-center">
+                    {product?.images?.[0] && (
+                      <img src={product.images[0]} alt={name} className="h-12 w-12 rounded-lg object-cover border" />
+                    )}
+                    <div className="space-y-1">
+                      <p className="font-medium text-sm">{name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Qty: {item.quantity} {unit}
+                        {price ? ` @ ₹${price.toLocaleString()}` : ""}
+                      </p>
+                    </div>
+                  </div>
+                  {price > 0 && (
+                    <p className="font-semibold text-sm">₹{(item.quantity * price).toLocaleString()}</p>
+                  )}
                 </div>
-                {item.price && (
-                  <p className="font-semibold text-sm">₹{(item.quantity * item.price).toLocaleString()}</p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="bg-muted/30 p-4 rounded-xl mt-4 border border-dashed border-primary/20">
             <div className="flex justify-between items-center text-lg font-bold">
@@ -218,6 +241,7 @@ const OrderDetailPage = () => {
           </div>
         </CardContent>
       </Card>
+
     </div>
   );
 };
