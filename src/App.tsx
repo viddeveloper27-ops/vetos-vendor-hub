@@ -13,6 +13,7 @@ import ProductsPage from "@/pages/ProductsPage";
 import OrdersPage from "@/pages/OrdersPage";
 import OrderDetailPage from "@/pages/OrderDetailPage";
 import SettingsPage from "@/pages/SettingsPage";
+import StatsPage from "@/pages/StatsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,10 +35,12 @@ const App = () => (
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/orders/:id" element={<OrderDetailPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<StatsPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

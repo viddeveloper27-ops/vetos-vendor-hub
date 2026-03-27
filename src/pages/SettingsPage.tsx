@@ -17,6 +17,11 @@ const SettingsPage = () => {
     state: vendor?.address?.state || "",
     pincode: vendor?.address?.pincode || "",
     country: vendor?.address?.country || "India",
+    accountHolderName: vendor?.bank?.accountHolderName || "",
+    accountNumber: vendor?.bank?.accountNumber || "",
+    bankName: vendor?.bank?.bankName || "",
+    ifscCode: vendor?.bank?.ifscCode || "",
+    upiId: vendor?.bank?.upiId || "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -36,6 +41,13 @@ const SettingsPage = () => {
         state: form.state || undefined,
         pincode: form.pincode || undefined,
         country: form.country || undefined,
+      },
+      bank: {
+        accountHolderName: form.accountHolderName || undefined,
+        accountNumber: form.accountNumber || undefined,
+        bankName: form.bankName || undefined,
+        ifscCode: form.ifscCode || undefined,
+        upiId: form.upiId || undefined,
       },
     });
     setSaving(false);
@@ -90,6 +102,32 @@ const SettingsPage = () => {
               <div className="space-y-2">
                 <Label>Country</Label>
                 <Input value={form.country} onChange={e => update("country", e.target.value)} />
+              </div>
+            </div>
+          </div>
+          
+          <div className="border-t pt-4">
+            <p className="text-sm font-medium text-muted-foreground mb-3">Bank Details</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Account Holder Name</Label>
+                <Input value={form.accountHolderName} onChange={e => update("accountHolderName", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Bank Name</Label>
+                <Input value={form.bankName} onChange={e => update("bankName", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Account Number</Label>
+                <Input value={form.accountNumber} onChange={e => update("accountNumber", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>IFSC Code</Label>
+                <Input value={form.ifscCode} onChange={e => update("ifscCode", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>UPI ID</Label>
+                <Input value={form.upiId} placeholder="e.g. username@bank" onChange={e => update("upiId", e.target.value)} />
               </div>
             </div>
           </div>

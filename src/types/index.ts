@@ -6,6 +6,14 @@ export interface VendorAddress {
   country?: string;
 }
 
+export interface VendorBank {
+  accountHolderName?: string;
+  accountNumber?: string;
+  bankName?: string;
+  ifscCode?: string;
+  upiId?: string;
+}
+
 export interface Vendor {
   _id: string;
   name: string;
@@ -13,6 +21,7 @@ export interface Vendor {
   email?: string;
   gstNumber?: string;
   address?: VendorAddress;
+  bank?: VendorBank;
   fcmToken?: string;
 }
 

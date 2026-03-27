@@ -4,7 +4,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu,
   SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, User, Bell } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, User, Bell, TrendingUp } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   DropdownMenu,
@@ -166,14 +166,14 @@ const DashboardLayout = () => {
                 Vendor Panel
               </span>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <button className="relative p-2 rounded-full hover:bg-white/10 transition-colors">
                 <Bell className="h-6 w-6 text-white" />
                 {/* Notification marker - only show if there are new alerts */}
                 {/* <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-white rounded-full border-2 border-primary shadow-sm" /> */}
               </button>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 outline-none hover:opacity-80 transition-opacity ml-1">
                   <div className="h-9 w-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-sm font-bold border border-white/30">
@@ -191,6 +191,10 @@ const DashboardLayout = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    <TrendingUp className="mr-2 h-4 w-4" />
+                    <span>Stats & Profile</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/settings")}>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
@@ -208,14 +212,14 @@ const DashboardLayout = () => {
           <main className="flex-1 p-4 md:p-6 overflow-auto pb-24">
             <Outlet />
           </main>
-          
+
           <nav className="fixed bottom-0 left-0 right-0 bg-primary h-20 flex items-center justify-around px-6 pb-2 safe-area-pb z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] rounded-t-[20px]">
             {navItems.map(item => {
               const isActive = location.pathname === item.url;
               return (
-                <Link 
-                  key={item.title} 
-                  to={item.url} 
+                <Link
+                  key={item.title}
+                  to={item.url}
                   className={`flex flex-col items-center gap-1 transition-all duration-300 ${isActive ? 'text-white' : 'text-white/60 hover:text-white/80'}`}
                 >
                   <div className={`p-2 rounded-xl transition-all ${isActive ? 'bg-white/20' : ''}`}>
@@ -227,7 +231,7 @@ const DashboardLayout = () => {
                 </Link>
               );
             })}
-            <button 
+            <button
               onClick={() => navigate("/settings")}
               className={`flex flex-col items-center gap-1 transition-all duration-300 ${location.pathname === "/settings" ? 'text-white' : 'text-white/60 hover:text-white/80'}`}
             >
