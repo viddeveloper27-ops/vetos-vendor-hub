@@ -12,14 +12,12 @@ import { useNavigate } from "react-router-dom";
 
 const statusColors: Record<string, string> = {
   PENDING: "bg-warning text-warning-foreground",
-  ACCEPTED: "bg-success text-success-foreground",
-  REJECTED: "bg-destructive text-destructive-foreground",
   SHIPPED: "bg-primary text-primary-foreground",
   DELIVERED: "bg-success text-success-foreground",
   CANCELLED: "bg-muted text-muted-foreground",
 };
 
-const STATUSES: OrderStatus[] = ["PENDING", "ACCEPTED", "REJECTED", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUSES: OrderStatus[] = ["PENDING", "SHIPPED", "DELIVERED", "CANCELLED"];
 const PAGE_SIZE = 8;
 
 const OrdersPage = () => {
@@ -77,7 +75,12 @@ const OrdersPage = () => {
 
   const getCustomerName = (o: Order) => {
     if (o.customerName) return o.customerName;
-    if (o.customerId) return `Customer: ...${o.customerId.slice(-6)}`;
+    if (o.customerId) {
+        if (typeof o.customerId === "string") {
+            return `Customer: ...${o.customerId.slice(-6)}`;
+        }
+        return `Customer: ${o.customerId.name || "Unknown"}`;
+    }
     return "Unknown Customer";
   };
 
