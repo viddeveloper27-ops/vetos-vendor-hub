@@ -30,28 +30,32 @@ const SettingsPage = () => {
   const handleSave = async () => {
     if (!form.name.trim()) { toast.error("Name is required"); return; }
     setSaving(true);
-    await new Promise(r => setTimeout(r, 300));
-    updateVendor({
-      name: form.name,
-      email: form.email || undefined,
-      gstNumber: form.gstNumber || undefined,
-      address: {
-        street: form.street || undefined,
-        city: form.city || undefined,
-        state: form.state || undefined,
-        pincode: form.pincode || undefined,
-        country: form.country || undefined,
-      },
-      bank: {
-        accountHolderName: form.accountHolderName || undefined,
-        accountNumber: form.accountNumber || undefined,
-        bankName: form.bankName || undefined,
-        ifscCode: form.ifscCode || undefined,
-        upiId: form.upiId || undefined,
-      },
-    });
-    setSaving(false);
-    toast.success("Profile updated successfully");
+    try {
+      await updateVendor({
+        name: form.name,
+        email: form.email || undefined,
+        gstNumber: form.gstNumber || undefined,
+        address: {
+          street: form.street || undefined,
+          city: form.city || undefined,
+          state: form.state || undefined,
+          pincode: form.pincode || undefined,
+          country: form.country || undefined,
+        },
+        bank: {
+          accountHolderName: form.accountHolderName || undefined,
+          accountNumber: form.accountNumber || undefined,
+          bankName: form.bankName || undefined,
+          ifscCode: form.ifscCode || undefined,
+          upiId: form.upiId || undefined,
+        },
+      });
+      toast.success("Profile updated successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -105,7 +109,7 @@ const SettingsPage = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="border-t pt-4">
             <p className="text-sm font-medium text-muted-foreground mb-3">Bank Details</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

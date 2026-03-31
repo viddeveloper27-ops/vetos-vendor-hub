@@ -26,8 +26,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     VendorAuthService.logout();
     setVendor(null);
   }, []);
-  const updateVendor = useCallback((data: Partial<Vendor>) => {
-    const updated = VendorAuthService.updateCurrentVendor(data);
+  const updateVendor = useCallback(async (data: Partial<Vendor>) => {
+    const updated = await VendorAuthService.updateCurrentVendor(data);
     if (updated) setVendor({ ...updated });
   }, []);
 
