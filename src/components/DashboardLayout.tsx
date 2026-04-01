@@ -95,7 +95,7 @@ const DashboardLayout = () => {
           const updatedVendor = await VendorService.update(vendor._id, { fcmToken: token });
           console.log("[FCM Sync] Successfully stored token in database:", updatedVendor.fcmToken ? "YES" : "NO");
           localStorage.removeItem("pending_fcm_token");
-          toast.success("Push notifications enabled");
+          // toast.success("Push notifications enabled");
         } catch (err) {
           console.error("[FCM Sync] Critical failure while saving token:", err);
         }
@@ -135,16 +135,29 @@ const DashboardLayout = () => {
       };
       handleWebFcm();
 
-      // 5. Listen for foreground messages
-      onMessageListener().then((payload: any) => {
+      // 5. Native Bridge: Expose navigation to Flutter
+      (window as any).navigateToPath = (path: string) => {
+        console.log("Native Bridge: Navigation requested to:", path);
+        navigate(path);
+      };
+
+      // 6. Listen for foreground messages
+      const unsubscribe = onMessageListener((payload: any) => {
         console.log("Notification received:", payload);
+        const orderId = payload.data?.orderId || payload.data?.id;
+
         toast.info(payload.notification?.title || "New Notification", {
           description: payload.notification?.body,
+          action: orderId ? {
+            label: "View Order",
+            onClick: () => navigate(`/orders/${orderId}`)
+          } : undefined,
         });
-      }).catch(err => console.log('FCM Listener failed: ', err));
+      });
 
       return () => {
         window.removeEventListener("fcmTokenReceived", handleTokenReceived);
+        unsubscribe();
       };
     }
   }, [vendor]);
