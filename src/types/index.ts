@@ -15,6 +15,7 @@ export interface VendorBank {
   ifscCode?: string;
   upiId?: string;
   pendingAmount?: number;
+  totalAmountReceived?: number;
 }
 
 export interface Vendor {

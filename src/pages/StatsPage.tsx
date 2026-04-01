@@ -76,10 +76,8 @@ const StatsPage = () => {
         VendorService.getBank(vendor!._id)
       ]);
 
-      // Calculate revenue from CONFIRMED or DELIVERED orders
-      const revenue = orders
-        .filter(o => o.status === "CONFIRMED" || o.status === "DELIVERED")
-        .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+      // Revenue from bank details
+      const revenue = bank?.totalAmountReceived || 0;
 
       setStats({
         totalRevenue: revenue,

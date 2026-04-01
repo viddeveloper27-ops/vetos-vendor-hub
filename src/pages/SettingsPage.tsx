@@ -1,23 +1,12 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import { VendorService } from "@/services/VendorService";
 import { VendorBank } from "@/types";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const SettingsPage = () => {
   const { vendor, updateVendor } = useAuth();
@@ -203,40 +192,6 @@ const SettingsPage = () => {
               </div>
             </div>
           </div>
-
-          {/* {bankDetails?.pendingAmount && bankDetails.pendingAmount > 0 && (
-            <div className="border-t pt-4">
-              <div className="bg-primary/5 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-primary/80">Pending Balance</p>
-                  <p className="text-3xl font-bold text-primary">₹{bankDetails.pendingAmount}</p>
-                  <p className="text-xs text-muted-foreground">Your previous payout failed or was manually settled. Withdraw the full amount to your linked account.</p>
-                </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button 
-                      disabled={withdrawing} 
-                      className="w-full sm:w-auto"
-                    >
-                      {withdrawing ? "Processing..." : "Withdraw Full Balance"}
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirm Withdrawal</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to withdraw ₹{bankDetails.pendingAmount} to your registered {bankDetails.accountNumber ? "bank account" : "UPI ID"}?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleWithdraw}>Confirm</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </div>
-          )} */}
 
           <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
             {saving ? "Saving..." : "Save Changes"}
