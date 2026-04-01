@@ -7,11 +7,14 @@ export interface VendorAddress {
 }
 
 export interface VendorBank {
+  _id?: string;
+  vendorId?: string;
   accountHolderName?: string;
   accountNumber?: string;
   bankName?: string;
   ifscCode?: string;
   upiId?: string;
+  pendingAmount?: number;
 }
 
 export interface Vendor {
