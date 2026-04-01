@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
-    allowedHosts: ["vendor-vetos.coderly.in", "vendor-vetos-akram.abhianand.in"],
+    allowedHosts: ["vendor-vetos.coderly.in", "vendor-vetos-akram.abhianand.in", "vetos-vendor.coderly.in"],
     hmr: {
       overlay: false,
     },

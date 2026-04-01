@@ -117,7 +117,7 @@ const OrderDetailPage = () => {
         </Button>
         <div>
           <h1 className="text-xl md:text-2xl font-semibold">Order Detail</h1>
-          <p className="text-xs text-muted-foreground font-mono">ID: {order._id}</p>
+          <p className="text-xs text-muted-foreground font-mono">Order ID: {order.orderId || `ORD-${order._id.slice(-8).toUpperCase()}`}</p>
         </div>
       </div>
 

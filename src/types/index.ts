@@ -58,6 +58,7 @@ export type OrderStatus = "PENDING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "C
 
 export interface Order {
   _id: string;
+  orderId?: string;
   vendorId: string;
   customerId?: string | Customer;
   customerName?: string;
