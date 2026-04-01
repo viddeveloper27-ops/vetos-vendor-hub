@@ -113,7 +113,7 @@ const SettingsPage = () => {
 
   const handleWithdraw = async () => {
     if (!bankDetails?.pendingAmount || !vendor?._id) return;
-    
+
     setWithdrawing(true);
     try {
       await VendorService.withdraw(vendor._id);
@@ -204,7 +204,7 @@ const SettingsPage = () => {
             </div>
           </div>
 
-          {bankDetails?.pendingAmount && bankDetails.pendingAmount > 0 && (
+          {/* {bankDetails?.pendingAmount && bankDetails.pendingAmount > 0 && (
             <div className="border-t pt-4">
               <div className="bg-primary/5 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
@@ -236,7 +236,7 @@ const SettingsPage = () => {
                 </AlertDialog>
               </div>
             </div>
-          )}
+          )} */}
 
           <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
             {saving ? "Saving..." : "Save Changes"}

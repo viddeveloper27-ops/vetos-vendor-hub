@@ -192,12 +192,12 @@ const DashboardLayout = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <TrendingUp className="mr-2 h-4 w-4" />
-                    <span>Stats & Profile</span>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>View Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/settings")}>
                     <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
+                    <span>Account Settings</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
@@ -217,7 +217,7 @@ const DashboardLayout = () => {
             {navItems.map(item => {
               const isActive = location.pathname === item.url;
               return (
-                <Link
+                <NavLink
                   key={item.title}
                   to={item.url}
                   className={`flex flex-col items-center gap-1 transition-all duration-300 ${isActive ? 'text-white' : 'text-white/60 hover:text-white/80'}`}
@@ -228,20 +228,20 @@ const DashboardLayout = () => {
                   <span className={`text-[11px] font-bold uppercase tracking-wider ${isActive ? 'opacity-100' : 'opacity-80'}`}>
                     {item.title.split(' ').pop()}
                   </span>
-                </Link>
+                </NavLink>
               );
             })}
-            <button
-              onClick={() => navigate("/settings")}
-              className={`flex flex-col items-center gap-1 transition-all duration-300 ${location.pathname === "/settings" ? 'text-white' : 'text-white/60 hover:text-white/80'}`}
+            <NavLink
+              to="/profile"
+              className={`flex flex-col items-center gap-1 transition-all duration-300 ${location.pathname === "/profile" ? 'text-white' : 'text-white/60 hover:text-white/80'}`}
             >
-              <div className={`p-2 rounded-xl transition-all ${location.pathname === "/settings" ? 'bg-white/20' : ''}`}>
-                <User className={`h-6 w-6 ${location.pathname === "/settings" ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`} />
+              <div className={`p-2 rounded-xl transition-all ${location.pathname === "/profile" ? 'bg-white/20' : ''}`}>
+                <User className={`h-6 w-6 ${location.pathname === "/profile" ? 'stroke-[2.5px]' : 'stroke-[1.5px]'}`} />
               </div>
-              <span className={`text-[11px] font-bold uppercase tracking-wider ${location.pathname === "/settings" ? 'opacity-100' : 'opacity-80'}`}>
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${location.pathname === "/profile" ? 'opacity-100' : 'opacity-80'}`}>
                 Profile
               </span>
-            </button>
+            </NavLink>
           </nav>
         </div>
       </div>
