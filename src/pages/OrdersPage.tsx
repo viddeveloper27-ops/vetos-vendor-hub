@@ -30,7 +30,7 @@ const statusConfig: Record<string, { color: string, icon: any }> = {
   CANCELLED: { color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400", icon: XCircle },
 };
 
-const STATUSES: OrderStatus[] = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUSES: OrderStatus[] = ["CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
 const PAGE_SIZE = 8;
 
 const OrdersPage = () => {
@@ -63,7 +63,9 @@ const OrdersPage = () => {
   }, [vendor]);
 
   const filtered = useMemo(() => {
-    let list = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    let list = [...orders]
+      .filter(o => o.status?.toUpperCase() !== "PENDING")
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     
     if (statusFilter !== "all") {
       list = list.filter(o => o.status.toUpperCase() === statusFilter.toUpperCase());
