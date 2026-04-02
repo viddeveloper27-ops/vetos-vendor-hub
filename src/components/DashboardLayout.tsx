@@ -4,7 +4,7 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu,
   SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, User, Bell, TrendingUp } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, User, Bell, TrendingUp, ArrowLeft, Wallet } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import {
   DropdownMenu,
@@ -17,8 +17,9 @@ import {
 
 const navItems = [
   // { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "My Products", url: "/products", icon: Package },
+  { title: "Products", url: "/products", icon: Package },
   { title: "Orders", url: "/orders", icon: ShoppingCart },
+  { title: "Wallet", url: "/wallet", icon: Wallet },
 ];
 
 function AppSidebarContent() {
@@ -141,42 +142,57 @@ const DashboardLayout = () => {
         navigate(path);
       };
 
-      // 6. Listen for foreground messages
-      const unsubscribe = onMessageListener((payload: any) => {
-        console.log("Notification received:", payload);
-        const orderId = payload.data?.orderId || payload.data?.id;
+      // // 6. Listen for foreground messages
+      // const unsubscribe = onMessageListener((payload: any) => {
+      //   console.log("Notification received:", payload);
+      //   const orderId = payload.data?.orderId || payload.data?.id;
 
-        toast.info(payload.notification?.title || "New Notification", {
-          description: payload.notification?.body,
-          action: orderId ? {
-            label: "View Order",
-            onClick: () => navigate(`/orders/${orderId}`)
-          } : undefined,
-        });
-      });
-
+      //   toast.info(payload.notification?.title || "New Notification", {
+      //     description: payload.notification?.body,
+      //     action: orderId ? {
+      //       label: "View Order",
+      //       onClick: () => navigate(`/orders/${orderId}`)
+      //     } : undefined,
+      //   });
+      // });
       return () => {
         window.removeEventListener("fcmTokenReceived", handleTokenReceived);
-        unsubscribe();
       };
     }
   }, [vendor]);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/auth/login");
+
+  const getPageTitle = (path: string) => {
+    if (path === "/products") return "My Products";
+    if (path === "/orders") return "Orders";
+    if (path.startsWith("/orders/")) return "Order Details";
+    if (path === "/profile") return "My Profile";
+    if (path === "/profile/details") return "About Me";
+    if (path === "/wallet") return "My Wallet";
+    if (path === "/settings") return "Account Settings";
+    return "Dashboard";
   };
+
+  const currentTitle = getPageTitle(location.pathname);
+  const showBackButton = location.pathname !== "/products";
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-slate-50 font-sans">
+      <div className="min-h-screen flex w-full bg-white bg-gradient-to-br from-white via-white to-rose-50/30 font-sans">
         {/* <AppSidebarContent /> */}
         <div className="flex-1 flex flex-col min-w-0">
           <header className="sticky top-0 z-30 h-16 flex items-center justify-between bg-primary text-primary-foreground px-4 shrink-0 shadow-md">
             <div className="flex items-center gap-3">
-              {/* <SidebarTrigger className="text-white hover:bg-white/20" /> */}
-              <span className="text-lg font-semibold tracking-tight">
-                Vendor Panel
+              {showBackButton && (
+                <button 
+                  onClick={() => navigate(-1)}
+                  className="p-2 rounded-full hover:bg-white/20 transition-colors"
+                >
+                  <ArrowLeft className="h-5 w-5 text-white" />
+                </button>
+              )}
+              <span className="text-lg font-bold tracking-tight">
+                {currentTitle}
               </span>
             </div>
 
@@ -187,38 +203,17 @@ const DashboardLayout = () => {
                 {/* <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-white rounded-full border-2 border-primary shadow-sm" /> */}
               </button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-2 outline-none hover:opacity-80 transition-opacity ml-1">
-                  <div className="h-9 w-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white text-sm font-bold border border-white/30">
-                    {vendor?.name?.charAt(0) || "V"}
-                  </div>
-                  <span className="text-sm font-medium hidden sm:inline">{vendor?.name}</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 mt-2">
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{vendor?.name}</p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {vendor?.email || "Vendor Account"}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <User className="mr-2 h-4 w-4" />
-                    <span>View Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/settings")}>
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Account Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <button 
+                onClick={() => navigate("/profile")}
+                className="flex items-center sm:gap-2 p-1 sm:pr-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all active:scale-95"
+              >
+                <div className="h-8 w-8 rounded-full bg-white text-primary flex items-center justify-center text-sm font-bold shadow-sm shrink-0">
+                  {vendor?.name?.charAt(0) || "V"}
+                </div>
+                <span className="text-sm font-semibold text-white hidden sm:inline whitespace-nowrap">
+                  {vendor?.name}
+                </span>
+              </button>
             </div>
           </header>
 

@@ -14,7 +14,10 @@ import OrdersPage from "@/pages/OrdersPage";
 import OrderDetailPage from "@/pages/OrderDetailPage";
 import SettingsPage from "@/pages/SettingsPage";
 import StatsPage from "@/pages/StatsPage";
+
+import WalletPage from "@/pages/WalletPage";
 import NotFound from "@/pages/NotFound";
+import ProfileDetailsPage from "./pages/ProfileDetailsPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +39,8 @@ const App = () => (
               <Route path="/orders/:id" element={<OrderDetailPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/profile" element={<StatsPage />} />
+              <Route path="/profile/details" element={<ProfileDetailsPage />} />
+              <Route path="/wallet" element={<WalletPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

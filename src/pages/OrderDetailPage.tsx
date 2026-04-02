@@ -10,8 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 const statusColors: Record<string, string> = {
   PENDING: "bg-warning text-warning-foreground",
   CONFIRMED: "bg-info text-info-foreground",
@@ -29,6 +40,9 @@ const OrderDetailPage = () => {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingCustomer, setLoadingCustomer] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<OrderStatus | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,15 +77,28 @@ const OrderDetailPage = () => {
     };
   }, [id]);
 
-  const handleStatusChange = async (status: string) => {
-    if (!order) return;
+  const handleStatusChange = (status: string) => {
+    const normalizedStatus = status.toUpperCase() as OrderStatus;
+    if (normalizedStatus === (typeof order?.status === 'string' ? order.status.toUpperCase() : "PENDING")) return;
+    setPendingStatus(normalizedStatus);
+    setShowConfirm(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!order || !pendingStatus) return;
+    setIsUpdating(true);
     try {
-      const normalizedStatus = status.toUpperCase() as OrderStatus;
-      const updated = await OrderService.updateStatus(order._id, normalizedStatus);
+      const updated = await OrderService.updateStatus(order._id, pendingStatus);
       setOrder(updated);
-      toast.success(`Order status updated to ${status}`);
+      toast.success(`Order status updated to ${pendingStatus}`, {
+        className: "bg-success text-success-foreground border-none font-medium",
+      });
     } catch (e: any) {
       toast.error(e?.message || "Failed to update status");
+    } finally {
+      setIsUpdating(false);
+      setShowConfirm(false);
+      setPendingStatus(null);
     }
   };
 
@@ -111,15 +138,6 @@ const OrderDetailPage = () => {
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl p-4 md:p-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/orders")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-xl md:text-2xl font-semibold">Order Detail</h1>
-          <p className="text-xs text-muted-foreground font-mono">Order ID: {order.orderId || `ORD-${order._id.slice(-8).toUpperCase()}`}</p>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
@@ -242,6 +260,40 @@ const OrderDetailPage = () => {
         </CardContent>
       </Card>
 
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-md rounded-[20px] border-primary/10 shadow-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-bold flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+              Confirm Status Update
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base pt-2">
+              Are you sure you want to change the order status to <span className={cn("font-bold", pendingStatus && (statusColors[pendingStatus]?.replace("bg-", "text-") || "text-primary"))}>{pendingStatus}</span>?
+              {pendingStatus === "CANCELLED" && (
+                <p className="mt-2 text-destructive font-medium text-sm">Warning: This action will notify the customer about the cancellation.</p>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel disabled={isUpdating} className="rounded-xl border-slate-200 hover:bg-slate-50 text-slate-600 font-semibold h-12">
+              Keep {currentStatus}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                confirmStatusChange();
+              }}
+              disabled={isUpdating}
+              className={cn(
+                "rounded-xl font-bold h-12 shadow-md transition-all active:scale-95",
+                pendingStatus && (statusColors[pendingStatus] || "bg-primary")
+              )}
+            >
+              {isUpdating ? "Updating..." : `Yes, Set to ${pendingStatus}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -34,6 +34,7 @@ export interface Vendor {
   status?: "pending" | "approved" | "rejected";
   isApproved?: boolean;
   fcmToken?: string;
+  createdAt?: string;
 }
 
 export type ProductCategory = "vaccine" | "food" | "accessory";
