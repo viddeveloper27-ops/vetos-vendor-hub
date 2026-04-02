@@ -21,11 +21,18 @@ export interface VendorBank {
 export interface Vendor {
   _id: string;
   name: string;
+  legalName?: string;
+  brandName?: string;
+  businessType?: "Sole Proprietorship" | "Partnership" | "LLP" | "Private Limited" | "Public Limited" | "Individual";
+  category?: "Pet Food" | "Medicine" | "Accessories" | "Services" | "Other";
   phone: string;
   email?: string;
   gstNumber?: string;
+  panNumber?: string;
   address?: VendorAddress;
   bank?: VendorBank;
+  status?: "pending" | "approved" | "rejected";
+  isApproved?: boolean;
   fcmToken?: string;
 }
 
