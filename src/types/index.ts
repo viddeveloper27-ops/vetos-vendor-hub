@@ -27,6 +27,7 @@ export interface Vendor {
   address?: VendorAddress;
   bank?: VendorBank;
   fcmToken?: string;
+  createdAt?: string;
 }
 
 export type ProductCategory = "vaccine" | "food" | "accessory";
