@@ -73,7 +73,8 @@ const OrdersPage = () => {
       const s = searchTerm.toLowerCase();
       list = list.filter(o => 
         o.orderId?.toLowerCase().includes(s) || 
-        o.customerName?.toLowerCase().includes(s)
+        o.customerName?.toLowerCase().includes(s) ||
+        (typeof o.customerId === "object" && (o.customerId as any)?.name?.toLowerCase().includes(s))
       );
     }
     
