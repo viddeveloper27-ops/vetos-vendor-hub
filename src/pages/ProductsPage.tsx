@@ -39,6 +39,8 @@ const ProductsPage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
@@ -122,48 +124,50 @@ const ProductsPage = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.name.trim()) { toast.error("Product name is required"); return; }
     if (form.price <= 0) { toast.error("Price must be greater than 0"); return; }
-    const run = async () => {
-      try {
-        if (editingProduct) {
-          await ProductService.update({
-            id: editingProduct._id,
-            data: { ...form },
-            existingImages,
-            imageFiles: newImageFiles,
-          });
-          toast.success("Product updated");
-        } else {
-          await ProductService.add({
-            product: { ...form, vendorId: vendor!._id } as any,
-            imageFiles: newImageFiles,
-          });
-          toast.success("Product added");
-        }
-        await reload();
-        setDialogOpen(false);
-      } catch (e: any) {
-        toast.error(e?.message || "Failed to save product");
+    if (saving) return;
+
+    try {
+      setSaving(true);
+      if (editingProduct) {
+        await ProductService.update({
+          id: editingProduct._id,
+          data: { ...form },
+          existingImages,
+          imageFiles: newImageFiles,
+        });
+        toast.success("Product updated");
+      } else {
+        await ProductService.add({
+          product: { ...form, vendorId: vendor!._id } as any,
+          imageFiles: newImageFiles,
+        });
+        toast.success("Product added");
       }
-    };
-    run();
+      await reload();
+      setDialogOpen(false);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to save product");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = () => {
-    if (!deleteTarget) return;
-    const run = async () => {
-      try {
-        await ProductService.delete(deleteTarget._id);
-        toast.success("Product deleted");
-        await reload();
-        setDeleteTarget(null);
-      } catch (e: any) {
-        toast.error(e?.message || "Failed to delete product");
-      }
-    };
-    run();
+  const handleDelete = async () => {
+    if (!deleteTarget || deleting) return;
+    try {
+      setDeleting(true);
+      await ProductService.delete(deleteTarget._id);
+      toast.success("Product deleted");
+      await reload();
+      setDeleteTarget(null);
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to delete product");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -415,8 +419,10 @@ const ProductsPage = () => {
           </div>
 
           <DialogFooter className="p-4 border-t bg-white shrink-0 flex-row gap-3">
-            <Button variant="outline" onClick={() => setDialogOpen(false)} className="h-10 text-slate-600 font-medium flex-1">Cancel</Button>
-            <Button onClick={handleSave} className="h-10 px-4 text-sm shadow-md active:scale-95 transition-transform flex-1">{editingProduct ? "Save Changes" : "Create Product"}</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={saving} className="h-10 text-slate-600 font-medium flex-1">Cancel</Button>
+            <Button onClick={handleSave} disabled={saving} className="h-10 px-4 text-sm shadow-md active:scale-95 transition-transform flex-1">
+              {saving ? (editingProduct ? "Updating..." : "Creating...") : (editingProduct ? "Save Changes" : "Create Product")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -431,11 +437,11 @@ const ProductsPage = () => {
             </p>
           </div>
           <div className="flex flex-row gap-3 mt-2">
-            <Button variant="outline" className="flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => setDeleteTarget(null)}>
+            <Button variant="outline" className="flex-1 h-11 rounded-xl border-slate-200 text-slate-600 hover:bg-slate-50" onClick={() => setDeleteTarget(null)} disabled={deleting}>
               Cancel
             </Button>
-            <Button className="flex-1 h-11 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm" onClick={handleDelete}>
-              Delete
+            <Button className="flex-1 h-11 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
             </Button>
           </div>
         </DialogContent>

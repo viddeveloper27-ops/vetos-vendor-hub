@@ -52,7 +52,7 @@ export const VendorAuthService = {
     return {
       success: true,
       otp: data.otp,
-      message: `OTP sent successfully (for dev: ${data.otp})`,
+      message: `Your OTP is ${data.otp}`,
     };
   },
 

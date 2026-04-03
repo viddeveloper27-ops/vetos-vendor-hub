@@ -12,7 +12,8 @@ const LoginPage = () => {
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
-  const [mockOtpHint, setMockOtpHint] = useState("");
+  const [otpHint, setOtpHint] = useState("");
+
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const LoginPage = () => {
       const result = await VendorAuthService.sendOtp(phone);
       setLoading(false);
       if (result.success) {
-        setMockOtpHint(result.message);
+        setOtpHint(result.message);
         setStep("otp");
         toast.success(result.message);
       } else {
@@ -100,9 +101,11 @@ const LoginPage = () => {
               </>
             ) : (
               <>
-                <div className="rounded-xl bg-primary/5 p-4 text-sm text-primary font-medium border border-primary/10">
-                  {mockOtpHint}
-                </div>
+                {otpHint && (
+                  <div className="rounded-xl bg-primary/5 p-4 text-sm text-primary font-medium border border-primary/10">
+                    {otpHint}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="otp" className="text-sm font-semibold">Enter OTP</Label>
                   <Input

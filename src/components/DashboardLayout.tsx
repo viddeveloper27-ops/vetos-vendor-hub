@@ -142,21 +142,23 @@ const DashboardLayout = () => {
         navigate(path);
       };
 
-      // // 6. Listen for foreground messages
-      // const unsubscribe = onMessageListener((payload: any) => {
-      //   console.log("Notification received:", payload);
-      //   const orderId = payload.data?.orderId || payload.data?.id;
+      // 6. Listen for foreground messages
+      const unsubscribeMessaging = onMessageListener((payload: any) => {
+        console.log("Notification received in foreground:", payload);
+        const orderId = payload.data?.orderId || payload.data?.id;
 
-      //   toast.info(payload.notification?.title || "New Notification", {
-      //     description: payload.notification?.body,
-      //     action: orderId ? {
-      //       label: "View Order",
-      //       onClick: () => navigate(`/orders/${orderId}`)
-      //     } : undefined,
-      //   });
-      // });
+        toast.info(payload.notification?.title || "New Notification", {
+          description: payload.notification?.body,
+          action: orderId ? {
+            label: "View Order",
+            onClick: () => navigate(`/orders/${orderId}`)
+          } : undefined,
+        });
+      });
+
       return () => {
         window.removeEventListener("fcmTokenReceived", handleTokenReceived);
+        unsubscribeMessaging();
       };
     }
   }, [vendor]);
