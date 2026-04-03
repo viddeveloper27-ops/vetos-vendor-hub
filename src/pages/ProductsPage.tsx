@@ -386,11 +386,11 @@ const ProductsPage = () => {
                       onChange={e => { handleImageFiles(e.target.files); e.target.value = ""; }}
                     />
                     <Button type="button" variant="outline" className="flex-1 h-11 border-dashed border-2 hover:border-primary hover:text-primary transition-all bg-white" onClick={() => fileInputRef.current?.click()}>
-                      <ImagePlus className="h-4 w-4 mr-2" />Upload
+                      <ImagePlus className="h-4 w-4 mr-2" />Add Images
                     </Button>
-                    <Button type="button" variant="outline" className="flex-1 h-11 border-dashed border-2 hover:border-primary hover:text-primary transition-all bg-white" onClick={() => cameraInputRef.current?.click()}>
+                    {/* <Button type="button" variant="outline" className="flex-1 h-11 border-dashed border-2 hover:border-primary hover:text-primary transition-all bg-white" onClick={() => cameraInputRef.current?.click()}>
                       <Camera className="h-4 w-4 mr-2" />Camera
-                    </Button>
+                    </Button> */}
                   </div>
                   {imagePreviews.length > 0 && (
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mt-3">
