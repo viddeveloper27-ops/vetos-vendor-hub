@@ -144,17 +144,8 @@ const DashboardLayout = () => {
 
       // 7. Listen for foreground messages (Web FCM and Native Bridge)
       const handleNotification = (payload: any) => {
-        console.log("FCM Payload received:", payload);
-        
-        // Robust extraction of orderId from payload
-        // Checks data.orderId, data.id, and nested data.data keys
-        const orderId = 
-          payload.data?.orderId || 
-          payload.data?.id || 
-          payload.data?.data?.orderId || 
-          payload.data?.data?.id;
-
-        console.log("Extracted orderId:", orderId);
+        console.log("Notification received:", payload);
+        const orderId = payload.data?.orderId || payload.data?.id;
 
         toast.info(payload.notification?.title || "New Notification", {
           description: payload.notification?.body,
