@@ -141,10 +141,12 @@ const DashboardLayout = () => {
         console.log("Native Bridge: Navigation requested to:", path);
         navigate(path);
       };
+      console.log("[DashboardLayout] Notification listeners initializing...");
+      // toast.info("Diagnostic: Notification system active"); // Test toast
 
-      // 6. Listen for foreground messages
+      // 6. Listen for foreground messages (JS SDK)
       const unsubscribeMessaging = onMessageListener((payload: any) => {
-        console.log("Notification received in foreground:", payload);
+        console.log("[JS SDK] Notification received in foreground:", payload);
         const orderId = payload.data?.orderId || payload.data?.id;
 
         toast.info(payload.notification?.title || "New Notification", {
@@ -156,9 +158,45 @@ const DashboardLayout = () => {
         });
       });
 
+      // 7. Native Bridge: Support for foreground messages passed from Flutter
+      (window as any).onNativeNotification = (payload: any) => {
+        console.log("[Native Bridge] Notification received from Flutter (direct call):", payload);
+        notificationHandler(payload);
+      };
+
+      const handleNativeNotification = (e: any) => {
+        console.log("[Native Bridge] Notification received via CustomEvent:", e.detail);
+        notificationHandler(e.detail);
+      };
+      window.addEventListener("nativeNotificationReceived", handleNativeNotification);
+
+      function notificationHandler(payload: any) {
+        // Normalize payload: Flutter/Standard FCM might pass it differently
+        const data = payload.data || payload;
+        const notification = payload.notification || payload;
+        
+        // Final fallback for fields
+        const title = notification.title || data.title || "New Order Notification";
+        const body = notification.body || data.body || data.message || "You have a new update";
+        const orderId = data.orderId || data.id;
+
+        console.log("[Notification Handler] Processing:", { title, body, orderId });
+
+        toast.info(title, {
+          description: body,
+          action: orderId ? {
+            label: "View Order",
+            onClick: () => navigate(`/orders/${orderId}`)
+          } : undefined,
+        });
+      }
+
       return () => {
+        console.log("[DashboardLayout] Cleaning up notification listeners...");
         window.removeEventListener("fcmTokenReceived", handleTokenReceived);
+        window.removeEventListener("nativeNotificationReceived", handleNativeNotification);
         unsubscribeMessaging();
+        delete (window as any).onNativeNotification;
       };
     }
   }, [vendor]);
@@ -178,6 +216,18 @@ const DashboardLayout = () => {
   const currentTitle = getPageTitle(location.pathname);
   const showBackButton = location.pathname !== "/products";
 
+  // Hidden test trigger (double click on title)
+  const triggerTestNotification = () => {
+    console.log("Triggering manual test notification...");
+    toast.info("Test Notification triggered", {
+      description: "This confirms that the toast system is working correctly.",
+      action: {
+        label: "OK",
+        onClick: () => console.log("Test toast action clicked")
+      }
+    });
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-white bg-gradient-to-br from-white via-white to-rose-50/30 font-sans">
@@ -193,7 +243,10 @@ const DashboardLayout = () => {
                   <ArrowLeft className="h-5 w-5 text-white" />
                 </button>
               )}
-              <span className="text-lg font-bold tracking-tight">
+              <span 
+                className="text-lg font-bold tracking-tight cursor-default select-none"
+                onDoubleClick={triggerTestNotification}
+              >
                 {currentTitle}
               </span>
             </div>
