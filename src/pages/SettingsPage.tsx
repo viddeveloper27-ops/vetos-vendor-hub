@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { VendorService } from "@/services/VendorService";
 import { VendorBank } from "@/types";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const SettingsPage = () => {
@@ -28,6 +29,7 @@ const SettingsPage = () => {
   const [saving, setSaving] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [bankDetails, setBankDetails] = useState<VendorBank | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (vendor?._id) {
@@ -97,6 +99,7 @@ const SettingsPage = () => {
       toast.error(error.message || "Failed to update profile");
     } finally {
       setSaving(false);
+      navigate(-1);
     }
   };
 
