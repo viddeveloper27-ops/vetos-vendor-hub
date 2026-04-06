@@ -148,7 +148,7 @@ const StatsPage = () => {
       <div className="flex flex-col items-center justify-center p-10 md:p-14 relative overflow-hidden group">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none rounded-[3rem]"></div>
         <div className="absolute -right-32 -top-32 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none group-hover:bg-primary/10 transition-colors duration-1000"></div>
-        
+
         <div className="absolute top-6 right-6 z-20">
           <Button
             variant="ghost"
@@ -160,9 +160,9 @@ const StatsPage = () => {
             <LogOut className="h-5 w-5" />
           </Button>
         </div>
-        
+
         <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-          <button 
+          <button
             onClick={() => navigate("/profile/details")}
             className="group/avatar relative transition-all duration-500 hover:scale-[1.05] active:scale-95"
           >
@@ -192,7 +192,7 @@ const StatsPage = () => {
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Quick Insights</h2>
           <div className="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-widest">Live Updates</div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 hover:border-rose-200 transition-all duration-500 group relative">
             <div className="absolute top-6 right-6 p-2 bg-emerald-50 rounded-2xl group-hover:bg-emerald-100 transition-colors">
@@ -243,7 +243,7 @@ const StatsPage = () => {
 
 
       {/* Charts Section - Integrated Design */}
-      <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-sm relative overflow-hidden group">
+      {/* <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-sm relative overflow-hidden group">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none group-hover:bg-primary/10 transition-colors duration-1000"></div>
         <div className="relative z-10 space-y-10">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -305,8 +305,8 @@ const StatsPage = () => {
           </div>
         </div>
       </div>
+    </div> */}
     </div>
-  </div>
   );
 };
 
