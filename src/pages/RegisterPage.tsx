@@ -16,6 +16,8 @@ const STEPS = [
   { id: 3, title: "Bank Account", icon: Landmark },
   { id: 4, title: "Address Details", icon: MapPin },
 ];
+import { ImagePlus, X, Camera } from "lucide-react";
+import { useRef } from "react";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -42,6 +44,9 @@ const RegisterPage = () => {
     pincode: "",
     country: "India",
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
 
@@ -103,9 +108,10 @@ const RegisterPage = () => {
           bankName: form.bankName,
           ifscCode: form.ifscCode,
           upiId: form.upiId || undefined,
-        }
+        },
+        imageFile: imageFile || undefined
       } as any);
-      
+
       setLoading(false);
       toast.success("Registration submitted! Please wait for admin approval.");
       setStep(5); // Success state
@@ -116,26 +122,42 @@ const RegisterPage = () => {
   };
 
   if (step === 5) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-        <Card className="w-full max-w-md text-center p-8 animate-in fade-in zoom-in duration-500">
-          <div className="flex justify-center mb-6">
-            <div className="bg-green-100 p-4 rounded-full">
-              <CheckCircle2 className="w-16 h-16 text-green-600" />
-            </div>
+    return <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+      < Card className="w-full max-w-md text-center p-8 animate-in fade-in zoom-in duration-500" >
+        <div className="flex justify-center mb-6">
+          <div className="bg-green-100 p-4 rounded-full">
+            <CheckCircle2 className="w-16 h-16 text-green-600" />
           </div>
-          <CardTitle className="text-2xl mb-2">Registration Successful!</CardTitle>
-          <CardDescription className="text-base mb-6">
-            Your application has been received and is currently under review by our admin team. 
-            You will receive a notification once your account is approved.
-          </CardDescription>
-          <Button className="w-full" onClick={() => navigate("/auth/login")}>
-            Back to Login
-          </Button>
-        </Card>
-      </div>
-    );
+        </div>
+        <CardTitle className="text-2xl mb-2">Registration Successful!</CardTitle>
+        <CardDescription className="text-base mb-6">
+          Your application has been received and is currently under review by our admin team.
+          You will receive a notification once your account is approved.
+        </CardDescription>
+        <Button className="w-full" onClick={() => navigate("/auth/login")}>
+          Back to Login
+        </Button>
+      </Card >
+    </div >
   }
+
+  const removeImage = () => {
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image size should be less than 5MB"); return; }
+
+    setImageFile(file);
+    const url = URL.createObjectURL(file);
+    setImagePreview(url);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 py-12">
@@ -158,8 +180,8 @@ const RegisterPage = () => {
               <div key={s.id} className="flex flex-col items-center group">
                 <div className={cn(
                   "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 bg-white border-2",
-                  isActive ? "border-primary text-primary scale-110 shadow-lg shadow-primary/20" : 
-                  isCompleted ? "border-green-500 bg-green-500 text-white" : "border-slate-200 text-slate-400"
+                  isActive ? "border-primary text-primary scale-110 shadow-lg shadow-primary/20" :
+                    isCompleted ? "border-green-500 bg-green-500 text-white" : "border-slate-200 text-slate-400"
                 )}>
                   {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <Icon className="w-5 h-5" />}
                 </div>
@@ -190,6 +212,41 @@ const RegisterPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in slide-in-from-right-4 duration-300">
               {step === 1 && (
                 <>
+                  <div className="space-y-3 py-2">
+                    <Label className="text-sm font-semibold text-slate-700">Business Logo / Identity (Optional)</Label>
+                    <div className="flex items-center gap-4">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
+                      />
+                      {!imagePreview ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full h-24 border-dashed border-2 hover:border-primary hover:text-primary transition-all flex flex-col gap-2"
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <ImagePlus className="h-6 w-6 text-muted-foreground" />
+                          <span className="text-xs">Click to upload logo</span>
+                        </Button>
+                      ) : (
+                        <div className="relative w-full h-32 rounded-xl overflow-hidden border border-slate-200 bg-slate-50 group">
+                          <img src={imagePreview} alt="Logo preview" className="w-full h-full object-contain" />
+                          <button
+                            type="button"
+                            onClick={removeImage}
+                            className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 shadow-lg active:scale-95 transition-transform"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground italic text-center">Supported formats: JPG, PNG, WEBP (Max 5MB)</p>
+                  </div>
                   <div className="space-y-2">
                     <Label>Public Store Name *</Label>
                     <Input placeholder="e.g. Pawsome Pet Store" value={form.name} onChange={e => update("name", e.target.value)} />
@@ -301,6 +358,7 @@ const RegisterPage = () => {
                   </div>
                 </>
               )}
+
             </div>
           </CardContent>
 

@@ -168,7 +168,7 @@ const StatsPage = () => {
           >
             <div className="absolute -inset-4 bg-gradient-to-tr from-primary/20 to-rose-400/20 rounded-full blur-xl opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-700"></div>
             <Avatar className="h-28 w-28 border-6 border-white shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)] relative z-10">
-              <AvatarImage src="" />
+              <AvatarImage src={vendor?.image} className="object-cover" />
               <AvatarFallback className="bg-gradient-to-br from-primary to-rose-400 text-white text-3xl font-black italic">
                 {initials}
               </AvatarFallback>

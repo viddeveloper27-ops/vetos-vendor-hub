@@ -29,6 +29,7 @@ export interface Vendor {
   email?: string;
   gstNumber?: string;
   panNumber?: string;
+  image?: string;
   address?: VendorAddress;
   bank?: VendorBank;
   status?: "pending" | "approved" | "rejected";

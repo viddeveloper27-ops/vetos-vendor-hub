@@ -217,8 +217,12 @@ const DashboardLayout = () => {
                 onClick={() => navigate("/profile")}
                 className="flex items-center sm:gap-2 p-1 sm:pr-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all active:scale-95"
               >
-                <div className="h-8 w-8 rounded-full bg-white text-primary flex items-center justify-center text-sm font-bold shadow-sm shrink-0">
-                  {vendor?.name?.charAt(0) || "V"}
+                <div className="h-8 w-8 rounded-full bg-white text-primary flex items-center justify-center text-sm font-bold shadow-sm shrink-0 overflow-hidden">
+                  {vendor?.image ? (
+                    <img src={vendor.image} alt="Profile" className="h-full w-full object-cover" />
+                  ) : (
+                    vendor?.name?.charAt(0) || "V"
+                  )}
                 </div>
                 <span className="text-sm font-semibold text-white hidden sm:inline whitespace-nowrap">
                   {vendor?.name}

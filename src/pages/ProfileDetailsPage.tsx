@@ -38,7 +38,7 @@ const ProfileDetailsPage = () => {
           {/* Profile Picture */}
           <div className="relative z-10 p-2 bg-white rounded-full shadow-2xl">
             <Avatar className="h-36 w-36 border-4 border-slate-50">
-              <AvatarImage src="" />
+              <AvatarImage src={vendor?.image} className="object-cover" />
               <AvatarFallback className="bg-gradient-to-br from-primary to-rose-400 text-white text-5xl font-black">
                 {initials}
               </AvatarFallback>
