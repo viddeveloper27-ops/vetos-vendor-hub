@@ -9,14 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import { 
-  Package, 
-  Clock, 
-  User, 
-  CheckCircle2, 
-  Truck, 
-  AlertCircle, 
-  XCircle, 
+import {
+  Package,
+  Clock,
+  User,
+  CheckCircle2,
+  Truck,
+  AlertCircle,
+  XCircle,
   ChevronRight,
   Search,
   Filter
@@ -30,7 +30,7 @@ const statusConfig: Record<string, { color: string, icon: any }> = {
   CANCELLED: { color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400", icon: XCircle },
 };
 
-const STATUSES: OrderStatus[] = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUSES: OrderStatus[] = ["CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
 const PAGE_SIZE = 8;
 
 const OrdersPage = () => {
@@ -64,20 +64,20 @@ const OrdersPage = () => {
 
   const filtered = useMemo(() => {
     let list = [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
+
     if (statusFilter !== "all") {
       list = list.filter(o => o.status.toUpperCase() === statusFilter.toUpperCase());
     }
-    
+
     if (searchTerm) {
       const s = searchTerm.toLowerCase();
-      list = list.filter(o => 
-        o.orderId?.toLowerCase().includes(s) || 
+      list = list.filter(o =>
+        o.orderId?.toLowerCase().includes(s) ||
         o.customerName?.toLowerCase().includes(s) ||
         (typeof o.customerId === "object" && (o.customerId as any)?.name?.toLowerCase().includes(s))
       );
     }
-    
+
     return list;
   }, [orders, statusFilter, searchTerm]);
 
@@ -88,7 +88,7 @@ const OrdersPage = () => {
     const s = status?.toUpperCase() || "PENDING";
     const config = statusConfig[s] || statusConfig.PENDING;
     const Icon = config.icon;
-    
+
     return (
       <Badge variant="outline" className={`flex items-center gap-1.5 py-1 px-3 rounded-full border-none font-medium shadow-sm ${config.color}`}>
         <Icon className="h-3.5 w-3.5" />
@@ -100,10 +100,10 @@ const OrdersPage = () => {
   const getCustomerName = (o: Order) => {
     if (o.customerName) return o.customerName;
     if (o.customerId) {
-        if (typeof o.customerId === "object") {
-            return (o.customerId as any).name || "Unknown Customer";
-        }
-        return `...${o.customerId.slice(-6)}`;
+      if (typeof o.customerId === "object") {
+        return (o.customerId as any).name || "Unknown Customer";
+      }
+      return `...${o.customerId.slice(-6)}`;
     }
     return "Unknown Customer";
   };
@@ -140,19 +140,19 @@ const OrdersPage = () => {
               {orders.length} total orders managed
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
             <div className="relative group flex-1 sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input 
-                type="text" 
-                placeholder="Search Order ID or Customer..." 
+              <input
+                type="text"
+                placeholder="Search Order ID or Customer..."
                 className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-border rounded-xl focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all text-sm shadow-sm"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            
+
             <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(1); }}>
               <SelectTrigger className="w-full sm:w-[180px] h-11 bg-white dark:bg-slate-900 border-border rounded-xl shadow-sm text-sm">
                 <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -186,14 +186,14 @@ const OrdersPage = () => {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-5">
             {paginated.map(o => (
-              <Card 
-                key={o._id} 
+              <Card
+                key={o._id}
                 className="group relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer border-border/50 bg-white dark:bg-slate-950 shadow-sm"
                 onClick={() => navigate(`/orders/${o._id}`)}
               >
                 {/* Decorative Accent */}
                 <div className={`absolute top-0 left-0 w-1.5 h-full transition-all duration-300 group-hover:w-2 ${statusConfig[o.status?.toUpperCase() || "PENDING"]?.color.split(' ')[0]}`} />
-                
+
                 <CardContent className="p-5 flex flex-col h-full">
                   <div className="flex justify-between items-start mb-4">
                     <div className="space-y-1">
@@ -243,8 +243,8 @@ const OrdersPage = () => {
 
           {hasMore && (
             <div className="flex justify-center mt-12">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="lg"
                 onClick={() => setPage(p => p + 1)}
                 className="rounded-2xl px-12 py-6 border-2 hover:bg-primary hover:text-white hover:border-primary transition-all duration-300 shadow-lg hover:shadow-primary/20"

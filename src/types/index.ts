@@ -24,6 +24,7 @@ export interface Vendor {
   phone: string;
   email?: string;
   gstNumber?: string;
+  image?: string;
   address?: VendorAddress;
   bank?: VendorBank;
   fcmToken?: string;

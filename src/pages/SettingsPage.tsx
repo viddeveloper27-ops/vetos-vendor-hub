@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { VendorService } from "@/services/VendorService";
 import { VendorBank } from "@/types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Camera, X, User } from "lucide-react";
 
 const SettingsPage = () => {
   const { vendor, updateVendor } = useAuth();
@@ -28,6 +29,9 @@ const SettingsPage = () => {
   const [saving, setSaving] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
   const [bankDetails, setBankDetails] = useState<VendorBank | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(vendor?.image || null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (vendor?._id) {
@@ -56,7 +60,7 @@ const SettingsPage = () => {
     setSaving(true);
     try {
       // 1. Update basic profile
-      await updateVendor({
+      const updated = await VendorService.update(vendor!._id, {
         name: form.name,
         email: form.email || undefined,
         gstNumber: form.gstNumber || undefined,
@@ -67,7 +71,10 @@ const SettingsPage = () => {
           pincode: form.pincode || undefined,
           country: form.country || undefined,
         },
-      });
+      }, imageFile || undefined);
+      
+      updateVendor(updated);
+      setImageFile(null); // Clear pending file after success
 
       // 2. Save bank details to dedicated bank collection
       if (vendor?._id) {
@@ -115,13 +122,64 @@ const SettingsPage = () => {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file"); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error("Image size should be less than 2MB"); return; }
+    
+    setImageFile(file);
+    const url = URL.createObjectURL(file);
+    setImagePreview(url);
+  };
+
+  const removeImage = () => {
+    if (imageFile && imagePreview) URL.revokeObjectURL(imagePreview);
+    setImageFile(null);
+    setImagePreview(vendor?.image || null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   return (
     <div className="space-y-6 animate-fade-in max-w-2xl">
       <h1 className="text-2xl font-semibold">Settings</h1>
 
       <Card>
-        <CardHeader><CardTitle className="text-base">Vendor Profile</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
+        <CardHeader><CardTitle className="text-base text-slate-800">Vendor Profile</CardTitle></CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex flex-col items-center sm:items-start gap-4 pb-2">
+            <Label className="text-sm font-semibold text-slate-700">Profile Image</Label>
+            <div className="relative group">
+              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-slate-100 bg-slate-50 flex items-center justify-center">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="h-10 w-10 text-slate-300" />
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                <Camera className="h-6 w-6 text-white" />
+              </div>
+              {imageFile && (
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full p-1 shadow-md active:scale-95 transition-transform"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+            <p className="text-[10px] text-muted-foreground italic">Update your business logo or profile picture.</p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Name *</Label>

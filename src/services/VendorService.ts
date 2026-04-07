@@ -29,11 +29,38 @@ export const VendorService = {
     return vendors.find((v) => v.phone === phone) || null;
   },
 
-  add: async (vendor: Omit<Vendor, "_id">): Promise<Vendor> => {
+  add: async (vendor: Omit<Vendor, "_id">, imageFile?: File): Promise<Vendor> => {
+    if (!imageFile) {
+      const res = await fetch(`${API_BASE}/vendor/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(vendor),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to create vendor");
+      }
+      const data = await res.json();
+      return data.vendor as Vendor;
+    }
+
+    const fd = new FormData();
+    fd.append("name", vendor.name);
+    fd.append("phone", vendor.phone);
+    if (vendor.email) fd.append("email", vendor.email);
+    if (vendor.gstNumber) fd.append("gstNumber", vendor.gstNumber);
+    if (vendor.address) {
+      if (vendor.address.street) fd.append("address[street]", vendor.address.street);
+      if (vendor.address.city) fd.append("address[city]", vendor.address.city);
+      if (vendor.address.state) fd.append("address[state]", vendor.address.state);
+      if (vendor.address.pincode) fd.append("address[pincode]", vendor.address.pincode);
+      if (vendor.address.country) fd.append("address[country]", vendor.address.country);
+    }
+    fd.append("image", imageFile);
+
     const res = await fetch(`${API_BASE}/vendor/add`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(vendor),
+      body: fd,
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -43,11 +70,38 @@ export const VendorService = {
     return data.vendor as Vendor;
   },
 
-  update: async (id: string, payload: Partial<Vendor>): Promise<Vendor> => {
+  update: async (id: string, payload: Partial<Vendor>, imageFile?: File): Promise<Vendor> => {
+    if (!imageFile) {
+      const res = await fetch(`${API_BASE}/vendor/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to update vendor");
+      }
+      const data = await res.json();
+      return data.vendor as Vendor;
+    }
+
+    const fd = new FormData();
+    if (payload.name) fd.append("name", payload.name);
+    if (payload.phone) fd.append("phone", payload.phone);
+    if (payload.email) fd.append("email", payload.email);
+    if (payload.gstNumber) fd.append("gstNumber", payload.gstNumber);
+    if (payload.address) {
+      if (payload.address.street) fd.append("address[street]", payload.address.street);
+      if (payload.address.city) fd.append("address[city]", payload.address.city);
+      if (payload.address.state) fd.append("address[state]", payload.address.state);
+      if (payload.address.pincode) fd.append("address[pincode]", payload.address.pincode);
+      if (payload.address.country) fd.append("address[country]", payload.address.country);
+    }
+    fd.append("image", imageFile);
+
     const res = await fetch(`${API_BASE}/vendor/${id}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: fd,
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));

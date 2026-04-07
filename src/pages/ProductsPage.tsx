@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Search, ImagePlus, X, Camera } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, ImagePlus, X, Camera, Image } from "lucide-react";
 import { useRef } from "react";
 
 const categoryColors: Record<string, string> = {
@@ -212,6 +212,7 @@ const ProductsPage = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-muted-foreground">
+                    <th className="text-left p-4 font-medium w-[80px]">Image</th>
                     <th className="text-left p-4 font-medium">Name</th>
                     <th className="text-left p-4 font-medium">Category</th>
                     <th className="text-left p-4 font-medium">Brand</th>
@@ -222,7 +223,16 @@ const ProductsPage = () => {
                 </thead>
                 <tbody>
                   {filtered.map(p => (
-                    <tr key={p._id} className="border-b last:border-0 hover:bg-muted/50">
+                    <tr key={p._id} className="border-b last:border-0 hover:bg-muted/50 align-middle">
+                      <td className="p-4">
+                        <div className="w-12 h-12 rounded-md overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-200">
+                          {p.images?.[0] ? (
+                            <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Image className="h-5 w-5 text-slate-400" />
+                          )}
+                        </div>
+                      </td>
                       <td className="p-4 font-medium">{p.name}</td>
                       <td className="p-4"><Badge className={categoryColors[p.category]}>{p.category}</Badge></td>
                       <td className="p-4 text-muted-foreground">{p.brand || "—"}</td>
@@ -242,21 +252,32 @@ const ProductsPage = () => {
           <div className="md:hidden space-y-3">
             {filtered.map(p => (
               <Card key={p._id}>
-                <CardContent className="p-4 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">{p.name}</p>
-                      <p className="text-sm text-muted-foreground">{p.brand || "No brand"}</p>
+                <CardContent className="p-4">
+                  <div className="flex gap-4">
+                    <div className="w-20 h-20 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-50 flex items-center justify-center relative">
+                      {p.images?.[0] ? (
+                        <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <Image className="h-8 w-8 text-slate-300" />
+                      )}
                     </div>
-                    <Badge className={categoryColors[p.category]}>{p.category}</Badge>
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-slate-900 truncate">{p.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{p.brand || "No brand"}</p>
+                        </div>
+                        <Badge className={`${categoryColors[p.category]} h-5 text-[10px] uppercase tracking-wider shrink-0`}>{p.category}</Badge>
+                      </div>
+                      <div className="flex justify-between items-baseline text-sm">
+                        <span className="text-slate-500">{p.quantity} {p.unit}</span>
+                        <span className="font-bold text-primary">₹{p.price.toLocaleString()}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>{p.quantity} {p.unit}</span>
-                    <span className="font-semibold">₹{p.price.toLocaleString()}</span>
-                  </div>
-                  <div className="flex gap-2 pt-1">
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => openEdit(p)}><Pencil className="h-3 w-3 mr-1" />Edit</Button>
-                    <Button variant="outline" size="sm" className="text-destructive flex-1" onClick={() => setDeleteTarget(p)}><Trash2 className="h-3 w-3 mr-1" />Delete</Button>
+                  <div className="flex gap-2 pt-4">
+                    <Button variant="outline" size="sm" className="flex-1 h-9 rounded-lg border-slate-200 hover:bg-slate-50" onClick={() => openEdit(p)}><Pencil className="h-3.5 w-3.5 mr-1.5" />Edit</Button>
+                    <Button variant="outline" size="sm" className="text-destructive flex-1 h-9 rounded-lg border-slate-200 hover:bg-destructive-50" onClick={() => setDeleteTarget(p)}><Trash2 className="h-3.5 w-3.5 mr-1.5" />Delete</Button>
                   </div>
                 </CardContent>
               </Card>
