@@ -62,13 +62,51 @@ const RegisterPage = () => {
         toast.error("Phone and Email are required");
         return;
       }
+
+      // Phone validation (10 digits starting with 6-9)
+      const phoneRegex = /^[6789]\d{9}$/;
+      if (!phoneRegex.test(form.phone.trim())) {
+        toast.error("Please enter a valid 10-digit mobile number");
+        return;
+      }
+
+      // Email validation
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(form.email.trim())) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+
       if (!form.panNumber.trim()) {
         toast.error("PAN number is required for verification");
         return;
       }
+
+      // PAN validation
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(form.panNumber.trim().toUpperCase())) {
+        toast.error("Please enter a valid PAN number (e.g., ABCDE1234F)");
+        return;
+      }
+
+      // GST validation (Optional)
+      if (form.gstNumber.trim()) {
+        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+        if (!gstRegex.test(form.gstNumber.trim().toUpperCase())) {
+          toast.error("Please enter a valid GST number");
+          return;
+        }
+      }
     } else if (step === 3) {
       if (!form.accountNumber.trim() || !form.ifscCode.trim()) {
         toast.error("Bank account details are required for settlements");
+        return;
+      }
+
+      // IFSC validation
+      const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+      if (!ifscRegex.test(form.ifscCode.trim().toUpperCase())) {
+        toast.error("Please enter a valid IFSC code (e.g., HDFC0001234)");
         return;
       }
     }
@@ -83,6 +121,13 @@ const RegisterPage = () => {
       return;
     }
 
+    // Pincode validation
+    const pincodeRegex = /^\d{6}$/;
+    if (!pincodeRegex.test(form.pincode.trim())) {
+      toast.error("Please enter a valid 6-digit pincode");
+      return;
+    }
+
     try {
       setLoading(true);
       await VendorService.add({
@@ -93,8 +138,8 @@ const RegisterPage = () => {
         category: form.category as any,
         phone: form.phone,
         email: form.email,
-        gstNumber: form.gstNumber || undefined,
-        panNumber: form.panNumber,
+        gstNumber: form.gstNumber?.toUpperCase() || undefined,
+        panNumber: form.panNumber.toUpperCase(),
         address: {
           street: form.street,
           city: form.city,
@@ -106,7 +151,7 @@ const RegisterPage = () => {
           accountHolderName: form.accountHolderName,
           accountNumber: form.accountNumber,
           bankName: form.bankName,
-          ifscCode: form.ifscCode,
+          ifscCode: form.ifscCode.toUpperCase(),
           upiId: form.upiId || undefined,
         },
         imageFile: imageFile || undefined

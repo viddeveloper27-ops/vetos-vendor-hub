@@ -77,14 +77,36 @@ const ProfileDetailsPage = () => {
               label="&id" 
               value={vendor?._id?.slice(-8).toUpperCase() || "N/A"} 
             />
+            {vendor?.brandName && (
+              <DetailItem 
+                label="Brand Name" 
+                value={vendor.brandName} 
+              />
+            )}
+            {vendor?.legalName && (
+              <DetailItem 
+                label="Legal Name" 
+                value={vendor.legalName} 
+              />
+            )}
+            <DetailItem 
+              label="Business Type" 
+              value={vendor?.businessType || "Individual"} 
+            />
+            <DetailItem 
+              label="Industry Category" 
+              value={vendor?.category || "Other"} 
+            />
             <DetailItem 
               label="PAN" 
-              value={vendor?.gstNumber ? `${vendor.gstNumber.slice(0, 3)}****${vendor.gstNumber.slice(-3)}` : "NTZ****77R"} 
+              value={vendor?.panNumber || "N/A"} 
             />
-            <DetailItem 
-              label="Aadhaar" 
-              value="**** **** 8650" 
-            />
+            {vendor?.gstNumber && (
+              <DetailItem 
+                label="GST Number" 
+                value={vendor.gstNumber} 
+              />
+            )}
           </div>
         </section>
 

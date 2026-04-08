@@ -38,7 +38,7 @@ export interface Vendor {
   createdAt?: string;
 }
 
-export type ProductCategory = "vaccine" | "food" | "accessory";
+export type ProductCategory = "vaccine" | "food" | "accessory" | "medicine";
 
 export interface Product {
   _id: string;

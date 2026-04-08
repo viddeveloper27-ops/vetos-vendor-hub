@@ -8,14 +8,20 @@ import { VendorBank } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Camera, X, User } from "lucide-react";
+import { Camera, X, User, Building2, Briefcase, CreditCard } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const SettingsPage = () => {
   const { vendor, updateVendor } = useAuth();
   const [form, setForm] = useState({
     name: vendor?.name || "",
+    legalName: vendor?.legalName || "",
+    brandName: vendor?.brandName || "",
+    businessType: vendor?.businessType || "Individual",
+    category: vendor?.category || "Other",
     email: vendor?.email || "",
     gstNumber: vendor?.gstNumber || "",
+    panNumber: vendor?.panNumber || "",
     street: vendor?.address?.street || "",
     city: vendor?.address?.city || "",
     state: vendor?.address?.state || "",
@@ -64,7 +70,12 @@ const SettingsPage = () => {
       // 1. Update basic profile
       const updated = await VendorService.update(vendor!._id, {
         name: form.name,
+        legalName: form.legalName || undefined,
+        brandName: form.brandName || undefined,
+        businessType: form.businessType as any,
+        category: form.category as any,
         email: form.email || undefined,
+        panNumber: form.panNumber || undefined,
         gstNumber: form.gstNumber || undefined,
         address: {
           street: form.street || undefined,
@@ -185,8 +196,16 @@ const SettingsPage = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Name *</Label>
+              <Label>Public Store Name *</Label>
               <Input value={form.name} onChange={e => update("name", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Legal Registered Name</Label>
+              <Input value={form.legalName} onChange={e => update("legalName", e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Brand Name</Label>
+              <Input value={form.brandName} onChange={e => update("brandName", e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Phone</Label>
@@ -197,8 +216,43 @@ const SettingsPage = () => {
               <Input value={form.email} onChange={e => update("email", e.target.value)} />
             </div>
             <div className="space-y-2">
+              <Label>PAN Card Number</Label>
+              <Input value={form.panNumber} onChange={e => update("panNumber", e.target.value.toUpperCase())} className="uppercase" />
+            </div>
+            <div className="space-y-2">
               <Label>GST Number</Label>
-              <Input value={form.gstNumber} onChange={e => update("gstNumber", e.target.value)} />
+              <Input value={form.gstNumber} onChange={e => update("gstNumber", e.target.value.toUpperCase())} className="uppercase" />
+            </div>
+            <div className="space-y-2">
+              <Label>Business Type</Label>
+              <Select value={form.businessType} onValueChange={(v) => update("businessType", v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Individual">Individual / Freelancer</SelectItem>
+                  <SelectItem value="Sole Proprietorship">Sole Proprietorship</SelectItem>
+                  <SelectItem value="Partnership">Partnership</SelectItem>
+                  <SelectItem value="LLP">LLP</SelectItem>
+                  <SelectItem value="Private Limited">Private Limited</SelectItem>
+                  <SelectItem value="Public Limited">Public Limited</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Industry Category</Label>
+              <Select value={form.category} onValueChange={(v) => update("category", v)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Pet Food">Pet Food & Nutrition</SelectItem>
+                  <SelectItem value="Medicine">Pharmacy / Medicine</SelectItem>
+                  <SelectItem value="Accessories">Toys & Accessories</SelectItem>
+                  <SelectItem value="Services">Grooming & Services</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

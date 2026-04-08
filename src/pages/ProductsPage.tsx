@@ -20,6 +20,7 @@ const categoryColors: Record<string, string> = {
   vaccine: "bg-success text-success-foreground",
   food: "bg-warning text-warning-foreground",
   accessory: "bg-primary text-primary-foreground",
+  medicine: "bg-violet-600 text-white",
 };
 
 const units = ["vial", "bag", "piece", "bottle", "box", "kg", "litre"];
@@ -202,6 +203,7 @@ const ProductsPage = () => {
             <SelectItem value="vaccine">Vaccines</SelectItem>
             <SelectItem value="food">Food</SelectItem>
             <SelectItem value="accessory">Accessories</SelectItem>
+            <SelectItem value="medicine">Medicine</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -328,6 +330,7 @@ const ProductsPage = () => {
                         <SelectItem value="vaccine">Vaccine</SelectItem>
                         <SelectItem value="food">Food</SelectItem>
                         <SelectItem value="accessory">Accessory</SelectItem>
+                        <SelectItem value="medicine">Medicine</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
