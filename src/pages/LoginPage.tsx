@@ -66,11 +66,11 @@ const LoginPage = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6 font-sans">
       <div className="w-full max-w-sm space-y-8 animate-fade-in">
         <div className="text-center space-y-2">
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-white shadow-lg mb-4">
-            <span className="text-3xl font-bold">D&J</span>
+          <div className="inline-flex h-24 w-24 items-center justify-center rounded-2xl bg-white shadow-lg mb-4 overflow-hidden border">
+            <img src="/logo.png" alt="VetOS Logo" className="h-full w-full object-contain" />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Dogs & <span className="text-primary">Joys</span>
+            Vet<span className="text-primary">OS</span>
           </h1>
           <p className="text-muted-foreground font-medium">Vendor Hub</p>
         </div>
@@ -101,11 +101,11 @@ const LoginPage = () => {
               </>
             ) : (
               <>
-                {otpHint && (
+                {/* {otpHint && (
                   <div className="rounded-xl bg-primary/5 p-4 text-sm text-primary font-medium border border-primary/10">
                     {otpHint}
                   </div>
-                )}
+                )} */}
                 <div className="space-y-2">
                   <Label htmlFor="otp" className="text-sm font-semibold">Enter OTP</Label>
                   <Input

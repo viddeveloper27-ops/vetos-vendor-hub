@@ -1,27 +1,3 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Wallet,
-  ArrowLeft,
-  ArrowUpRight,
-  ArrowDownRight,
-  Banknote,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  TrendingUp,
-  CreditCard,
-  QrCode,
-  IndianRupee
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { OrderService } from "@/services/OrderService";
-import { VendorService } from "@/services/VendorService";
-import { VendorBank, Order } from "@/types";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +9,27 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { OrderService } from "@/services/OrderService";
+import { VendorService } from "@/services/VendorService";
+import { VendorBank } from "@/types";
 import { format } from "date-fns";
+import {
+  AlertCircle,
+  ArrowDownRight,
+  ArrowUpRight,
+  Calendar,
+  CreditCard,
+  Edit3,
+  IndianRupee,
+  QrCode,
+  TrendingUp
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const WalletPage = () => {
   const { vendor } = useAuth();
@@ -110,60 +106,62 @@ const WalletPage = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in pb-24">
 
-      {/* Stats Cards - Integrated Redesign */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Pending Balance - Integrated White Card */}
-        <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 hover:border-rose-200 transition-all duration-500 group relative shadow-sm h-full flex flex-col justify-between">
-          <div className="space-y-8">
+      {/* Refined Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        {/* Pending Balance - Glassmorphism Card */}
+        <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-5 border border-white hover:bg-white transition-all duration-500 group relative shadow-2xl shadow-slate-200/50 h-full flex flex-col justify-between overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
+
+          <div className="space-y-10 relative z-10 text-center md:text-left">
             <div className="space-y-6">
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Available Balance</span>
-              <div className="text-5xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-                <span className="text-3xl font-bold text-slate-300 translate-y-[2px]">₹</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">Current Payout Balance</span>
+              <div className="text-5xl font-bold text-slate-900 tracking-tight flex justify-center md:justify-start items-center gap-2">
+                <span className="text-3xl font-medium text-slate-300 translate-y-[2px]">₹</span>
                 {bankDetails?.pendingAmount?.toLocaleString() || "0"}
               </div>
-              
-              <div className="flex items-center gap-2 text-emerald-500">
-                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.15em]">Withdrawable</span>
+
+              <div className="flex items-center justify-center md:justify-start gap-2 text-emerald-500/80">
+                <div className="h-2 w-2 rounded-full bg-emerald-500/50 animate-pulse"></div>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Ready for Settlement</span>
               </div>
             </div>
 
             <div className="pt-4">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button 
+                  <Button
                     disabled={!bankDetails?.pendingAmount || bankDetails.pendingAmount <= 0 || withdrawing}
-                    className="w-full bg-primary text-white hover:bg-primary/90 font-black py-7 rounded-2xl shadow-xl shadow-primary/20 border-none transition-all duration-300 hover:scale-[1.02] active:scale-95 text-lg"
+                    className="w-full bg-slate-900 text-white hover:bg-slate-800 font-semibold py-7 rounded-2xl shadow-xl shadow-slate-200 border-none transition-all duration-300 hover:translate-y-[-2px] active:translate-y-[0px] text-lg"
                   >
                     {withdrawing ? "Processing..." : "Transfer to Bank"}
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl">
+                <AlertDialogContent className="rounded-[2.5rem] border-none shadow-2xl bg-white/90 backdrop-blur-xl">
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-2xl font-bold">Confirm Withdrawal</AlertDialogTitle>
-                    <AlertDialogDescription className="text-slate-600">
-                      You are about to withdraw <span className="font-bold text-slate-900">₹{bankDetails?.pendingAmount}</span> to your linked account.
+                    <AlertDialogTitle className="text-2xl font-bold">Confirm Payout</AlertDialogTitle>
+                    <AlertDialogDescription className="text-slate-500 font-medium">
+                      Funds will be wired to your linked destination.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
+                  <div className="bg-slate-100/50 backdrop-blur-sm p-6 rounded-3xl border border-slate-100 space-y-4">
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-500">Destination</span>
-                      <span className="font-semibold text-slate-900 truncate max-w-[200px]">
-                        {bankDetails?.accountNumber ? `${bankDetails.bankName} (...${bankDetails.accountNumber.slice(-4)})` : bankDetails?.upiId || "Not Linked"}
+                      <span className="text-slate-400 font-medium uppercase tracking-wider text-[10px]">Destination Account</span>
+                      <span className="font-semibold text-slate-800 truncate max-w-[180px]">
+                        {bankDetails?.accountNumber ? `${bankDetails.bankName} (...${bankDetails.accountNumber.slice(-4)})` : bankDetails?.upiId || "Unlinked"}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-slate-500">Amount</span>
-                      <span className="font-bold text-primary italic">₹{bankDetails?.pendingAmount}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-400 font-medium uppercase tracking-wider text-[10px]">Net Payout</span>
+                      <span className="font-bold text-slate-900 text-xl tracking-tight">₹{bankDetails?.pendingAmount?.toLocaleString()}</span>
                     </div>
                   </div>
-                  <AlertDialogFooter className="mt-4 sm:space-x-3">
-                    <AlertDialogCancel className="rounded-xl border-slate-200">Cancel</AlertDialogCancel>
+                  <AlertDialogFooter className="mt-6 sm:space-x-3">
+                    <AlertDialogCancel className="rounded-xl border-slate-100 font-semibold px-6">Review again</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleWithdraw}
-                      className="rounded-xl bg-primary hover:bg-primary/90 px-8"
+                      className="rounded-xl bg-primary hover:bg-primary/90 px-8 font-semibold shadow-lg shadow-primary/20"
                     >
-                      Confirm
+                      Authorize Transfer
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -172,47 +170,48 @@ const WalletPage = () => {
           </div>
         </div>
 
-        {/* Total Earnings Card - Integrated Design */}
-        <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 relative group transition-all duration-500 overflow-hidden shadow-sm">
-          <div className="absolute top-6 right-6 p-3 bg-emerald-50 rounded-2xl group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
+        {/* Total Earnings Card - Glassmorphism Design */}
+        <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] p-5 border border-white relative group transition-all duration-500 overflow-hidden shadow-2xl shadow-slate-200/50">
+          <div className="absolute top-8 right-8 p-3 bg-emerald-50 rounded-2xl group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300">
             <TrendingUp className="h-5 w-5 text-emerald-600 group-hover:text-white" />
           </div>
-          <div className="space-y-8">
+          <div className="space-y-10">
             <div className="space-y-6">
-              <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Total Settlement</span>
-              <div className="text-5xl font-black text-slate-900 tracking-tighter flex items-center gap-2">
-                <span className="text-3xl font-bold text-slate-300 translate-y-[2px]">₹</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">Lifetime Settlements</span>
+              <div className="text-5xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <span className="text-3xl font-medium text-slate-300 translate-y-[2px]">₹</span>
                 {bankDetails?.totalAmountReceived?.toLocaleString() || "0"}
               </div>
-              
-              <div className="flex items-center gap-2 text-rose-500">
-                <div className="h-2 w-2 rounded-full bg-rose-500"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.15em]">Paid to Bank</span>
+
+              <div className="flex items-center gap-2 text-rose-500/80">
+                <div className="h-2 w-2 rounded-full bg-rose-500/50"></div>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Verified Disbursals</span>
               </div>
             </div>
 
-            <div className="mt-12 p-8 bg-slate-50/80 rounded-[2rem] border border-slate-100 group-hover:border-primary/20 transition-all duration-300 relative z-10">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-5">
-                  <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 group-hover:rotate-6 transition-transform">
-                    {bankDetails?.accountNumber ? <CreditCard className="h-7 w-7 text-slate-700" /> : <QrCode className="h-7 w-7 text-slate-700" />}
-                  </div>
+            <div className="mt-8 relative group/bank">
+              <div className="bg-slate-100/40 p-5 rounded-3xl border border-slate-100/50 flex items-center justify-between transition-all duration-500 group-hover/bank:bg-white group-hover/bank:shadow-lg">
+                <div className="flex items-center gap-4 text-left">
+
                   <div className="space-y-1">
-                    <p className="text-xs font-black text-slate-900">
-                      {bankDetails?.accountNumber ? bankDetails.bankName : "Primary UPI"}
-                    </p>
-                    <p className="text-[10px] text-slate-400 font-medium font-mono tracking-wider">
-                      {bankDetails?.accountNumber ? `**** ${bankDetails.accountNumber.slice(-4)}` : bankDetails?.upiId ? `@${bankDetails.upiId.split('@')[1] || bankDetails.upiId}` : "Identity verified"}
+                    <div className="flex items-center gap-2">
+                      <p className="text-[12px] font-bold text-slate-900 leading-none">
+                        {bankDetails?.accountNumber ? bankDetails.bankName : bankDetails?.upiId ? "UPI Hub" : "Cash Settlements"}
+                      </p>
+                      <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] h-3.5 px-1.5 font-bold uppercase">Active</Badge>
+                    </div>
+                    <p className="text-[10px] text-slate-400 font-medium font-mono uppercase tracking-wider">
+                      {bankDetails?.accountNumber ? `•••• ${bankDetails.accountNumber.slice(-4)}` : bankDetails?.upiId ? `@${bankDetails.upiId.split('@')[1] || bankDetails.upiId}` : "Identity Verified"}
                     </p>
                   </div>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-primary hover:bg-primary/10 text-xs font-black rounded-xl px-5 py-5"
+                  className="h-8 w-8 p-0 text-slate-300 hover:text-primary hover:bg-primary/5 transition-colors"
                   onClick={() => navigate("/settings")}
                 >
-                  Edit
+                  <Edit3 className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
@@ -220,36 +219,38 @@ const WalletPage = () => {
         </div>
       </div>
 
-      {/* Transaction History */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between px-1">
-          <h2 className="text-xl font-bold text-slate-900">Recent Transactions</h2>
-          <Button variant="ghost" className="text-slate-500 text-sm font-medium">View All</Button>
+      {/* Transaction History - Refined List */}
+      <div className="space-y-6 pt-6">
+        <div className="flex items-center justify-between px-2">
+          <h2 className="text-xl font-semibold text-slate-800 tracking-tight">Recent Activity</h2>
+          <Button 
+            variant="ghost" 
+            className="text-primary text-[10px] font-bold uppercase tracking-widest hover:bg-primary/5 px-4 rounded-xl transition-all"
+            onClick={() => navigate("/transactions")}
+          >
+            View Statement
+          </Button>
         </div>
 
         {transactions.length > 0 ? (
           <div className="space-y-4">
             {transactions.map((tx) => (
-              <div key={tx.id} className="bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 rounded-[2rem] p-6 group cursor-pointer overflow-hidden relative">
-                <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div key={tx.id} className="bg-white/60 backdrop-blur-md border border-white shadow-xl shadow-slate-200/30 hover:bg-white transition-all duration-500 rounded-3xl p-6 group cursor-pointer relative overflow-hidden">
                 <div className="flex items-center justify-between relative z-10">
-                  <div className="flex items-center gap-6">
-                    <div className={`p-4 rounded-2xl transition-all duration-500 ${tx.type === 'credit' ? 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white' : 'bg-rose-50 text-rose-600 group-hover:bg-rose-500 group-hover:text-white'}`}>
-                      {tx.type === 'credit' ? <ArrowDownRight className="h-7 w-7" /> : <ArrowUpRight className="h-7 w-7" />}
-                    </div>
+                  <div className="flex items-center gap-5">
                     <div>
-                      <p className="font-black text-slate-900 text-base tracking-tight">{tx.title}</p>
-                      <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.2em] flex items-center gap-2 mt-1">
-                        <Clock className="h-3 w-3" />
+                      <p className="font-semibold text-slate-900 text-sm tracking-tight">{tx.title}</p>
+                      <p className="text-[10px] text-slate-400 uppercase font-semibold tracking-[0.1em] flex items-center gap-2 mt-1">
+                        <Calendar className="h-3.5 w-3.5" />
                         {format(tx.date, "MMM dd, hh:mm a")}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`font-black text-xl tracking-tighter ${tx.type === 'credit' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                    <p className={`font-bold text-xl tracking-tight ${tx.type === 'credit' ? 'text-emerald-500' : 'text-rose-500'}`}>
                       {tx.type === 'credit' ? '+' : '-'} ₹{tx.amount.toLocaleString()}
                     </p>
-                    <div className={`text-[10px] uppercase font-black tracking-[0.3em] mt-1 ${tx.status === 'completed' ? 'text-emerald-500' : 'text-orange-500'}`}>
+                    <div className={`text-[9px] uppercase font-bold tracking-[0.2em] mt-1.5 px-2 py-0.5 rounded-full inline-block ${tx.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'}`}>
                       {tx.status}
                     </div>
                   </div>
@@ -258,33 +259,35 @@ const WalletPage = () => {
             ))}
           </div>
         ) : (
-          <div className="border-dashed border-2 border-slate-200 bg-slate-50/50 rounded-[2.5rem] py-20">
-            <div className="flex flex-col items-center justify-center space-y-4">
-              <div className="p-6 bg-white rounded-full shadow-sm text-slate-300">
-                < IndianRupee className="h-12 w-12" />
+          <div className="border-dashed border-2 border-slate-100 bg-slate-50/20 backdrop-blur-sm rounded-[2.5rem] py-24">
+            <div className="flex flex-col items-center justify-center space-y-6 text-center px-4">
+              <div className="h-20 w-20 bg-white rounded-full shadow-2xl shadow-slate-200 flex items-center justify-center text-slate-200">
+                <IndianRupee className="h-10 w-10" />
               </div>
-              <p className="text-slate-500 font-bold tracking-tight">No Transactions Recorded</p>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Orders will appear here once confirmed</p>
+              <div className="space-y-2">
+                <p className="text-slate-500 font-semibold text-lg tracking-tight">No Transactions Recorded</p>
+                <p className="text-[10px] text-slate-400 font-medium uppercase tracking-[0.2em] max-w-xs leading-relaxed">Confirmed orders will appear here for settlement</p>
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Bank Account Linking Alert (if not linked) */}
+      {/* Bank Account Linking Alert - Refined */}
       {(!bankDetails || (!bankDetails.accountNumber && !bankDetails.upiId)) && (
-        <div className="bg-orange-50 border border-orange-100 rounded-3xl p-6 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
-          <div className="p-4 bg-orange-100 rounded-2xl text-orange-600 shrink-0">
+        <div className="bg-amber-50/50 backdrop-blur-sm border border-amber-100 rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-6 shadow-xl shadow-amber-200/20">
+          <div className="h-16 w-16 bg-white rounded-2xl text-amber-500 flex items-center justify-center shadow-sm shrink-0">
             <AlertCircle className="h-8 w-8" />
           </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h3 className="font-bold text-orange-900 text-lg">Bank Account Not Linked</h3>
-            <p className="text-orange-700 text-sm">Please update your bank details to receive payouts directly to your account.</p>
+          <div className="flex-1 text-center md:text-left space-y-1">
+            <h3 className="font-semibold text-amber-900 text-lg tracking-tight">Financial Identity Undefined</h3>
+            <p className="text-amber-700/80 text-sm font-medium">Please link your bank account or UPI ID to enable seamless payouts from the platform.</p>
           </div>
           <Button
-            className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl px-8"
+            className="bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-2xl px-10 h-14 shadow-lg shadow-amber-600/20 transition-all hover:scale-[1.02]"
             onClick={() => navigate("/settings")}
           >
-            Fix Now
+            Update Profile
           </Button>
         </div>
       )}

@@ -31,7 +31,7 @@ const statusColors: Record<string, string> = {
   CANCELLED: "bg-muted text-muted-foreground",
 };
 
-const STATUSES: OrderStatus[] = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
+const STATUSES: OrderStatus[] = ["CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
 
 const OrderDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -137,7 +137,7 @@ const OrderDetailPage = () => {
       : "No address provided");
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl p-4 md:p-6">
+    <div className="space-y-6 animate-fade-in max-w-4xl p-1 md:p-6">
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-2">
@@ -172,12 +172,12 @@ const OrderDetailPage = () => {
 
             <Separator />
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="space-y-1">
+            <div className="flex flex-col gap-4 text-sm">
+              <div className="space-y-1 flex items-center justify-between gap-4">
                 <p className="text-muted-foreground flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Payment Method</p>
                 <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">{order.paymentMethod?.toUpperCase() || "COD"}</Badge>
               </div>
-              <div className="space-y-1">
+              <div className="space-y-1 flex items-center justify-between gap-4">
                 <p className="text-muted-foreground flex items-center gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Status</p>
                 <Badge
                   variant="outline"

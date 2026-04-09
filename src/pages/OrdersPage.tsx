@@ -136,7 +136,7 @@ const OrdersPage = () => {
       <div className="bg-gradient-to-br from-primary/5 via-primary/2 to-background p-6 rounded-3xl border border-primary/10 shadow-sm">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">Orders</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Orders</h1>
             <p className="text-muted-foreground mt-1 flex items-center gap-2">
               <Package className="h-4 w-4 text-primary" />
               {orders.length} total orders managed

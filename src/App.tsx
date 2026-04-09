@@ -18,6 +18,7 @@ import StatsPage from "@/pages/StatsPage";
 import WalletPage from "@/pages/WalletPage";
 import NotFound from "@/pages/NotFound";
 import ProfileDetailsPage from "./pages/ProfileDetailsPage";
+import AllTransactions from "./pages/AllTransactions";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/profile" element={<StatsPage />} />
               <Route path="/profile/details" element={<ProfileDetailsPage />} />
               <Route path="/wallet" element={<WalletPage />} />
+              <Route path="/transactions" element={<AllTransactions />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -44,11 +44,11 @@ function AppSidebarContent() {
       <div className="p-4 border-b border-white/10 bg-primary text-white">
         {!collapsed && (
           <Link to="/dashboard" className="text-xl font-bold tracking-tight">
-            Dogs & <span className="text-white/80">Joys</span>
+            Vet<span className="text-white/80">OS</span>
           </Link>
         )}
         {collapsed && (
-          <Link to="/dashboard" className="text-xl font-bold">D</Link>
+          <Link to="/dashboard" className="text-xl font-bold">V</Link>
         )}
       </div>
       <SidebarContent className="bg-background">
