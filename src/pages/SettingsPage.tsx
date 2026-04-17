@@ -2,14 +2,36 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { VendorService } from "@/services/VendorService";
 import { VendorBank } from "@/types";
-import { useNavigate } from "react-router-dom";
+import { Camera, User, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Camera, X, User, Building2, Briefcase, CreditCard } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const REGEX = {
+  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  PAN: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+  IFSC: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+  GST: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+  UPI: /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/,
+};
+
+const LIMITS = {
+  NAME: 100,
+  BRAND: 50,
+  STREET: 200,
+  CITY: 50,
+  STATE: 50,
+  PINCODE: 6,
+  ACC_NAME: 100,
+  ACC_NUM_MIN: 9,
+  ACC_NUM_MAX: 18,
+  BANK: 50,
+  UPI: 50
+};
 
 const SettingsPage = () => {
   const { vendor, updateVendor } = useAuth();
@@ -64,7 +86,26 @@ const SettingsPage = () => {
   const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }));
 
   const handleSave = async () => {
-    if (!form.name.trim()) { toast.error("Name is required"); return; }
+    // Basic Profile Validation
+    if (!form.name.trim() || form.name.trim().length < 3) { toast.error("Public store name must be at least 3 characters"); return; }
+    if (form.email && !REGEX.EMAIL.test(form.email)) { toast.error("Invalid email format"); return; }
+    if (form.panNumber && !REGEX.PAN.test(form.panNumber)) { toast.error("Invalid PAN format (e.g. ABCDE1234F)"); return; }
+    if (form.gstNumber && !REGEX.GST.test(form.gstNumber)) { toast.error("Invalid GST format"); return; }
+    
+    // Address Validation
+    if (form.pincode && !/^\d{6}$/.test(form.pincode)) { toast.error("Pincode must be exactly 6 digits"); return; }
+
+    // Bank Detail Validation
+    if (form.accountHolderName || form.accountNumber || form.bankName || form.ifscCode) {
+      if (form.accountHolderName && form.accountHolderName.length < 3) { toast.error("Account holder name must be at least 3 characters"); return; }
+      if (form.accountNumber && (form.accountNumber.length < LIMITS.ACC_NUM_MIN || form.accountNumber.length > LIMITS.ACC_NUM_MAX)) {
+        toast.error(`Account number must be between ${LIMITS.ACC_NUM_MIN} and ${LIMITS.ACC_NUM_MAX} digits`);
+        return;
+      }
+      if (form.ifscCode && !REGEX.IFSC.test(form.ifscCode)) { toast.error("Invalid 11-digit IFSC code format"); return; }
+      if (form.upiId && !REGEX.UPI.test(form.upiId)) { toast.error("Invalid UPI ID format (e.g. name@bank)"); return; }
+    }
+
     setSaving(true);
     try {
       // 1. Update basic profile
@@ -197,15 +238,20 @@ const SettingsPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Public Store Name *</Label>
-              <Input value={form.name} onChange={e => update("name", e.target.value)} />
+              <Input value={form.name} maxLength={LIMITS.NAME} onChange={e => update("name", e.target.value)} 
+                onKeyDown={e => {
+                  if (/^\d$/.test(e.key)) e.preventDefault(); // Block digits in store name (if preferred, or remove if digits allowed)
+                }}
+              />
+              {form.name && form.name.length < 3 && <p className="text-[10px] text-destructive">Minimum 3 characters required</p>}
             </div>
             <div className="space-y-2">
               <Label>Legal Registered Name</Label>
-              <Input value={form.legalName} onChange={e => update("legalName", e.target.value)} />
+              <Input value={form.legalName} maxLength={LIMITS.NAME} onChange={e => update("legalName", e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Brand Name</Label>
-              <Input value={form.brandName} onChange={e => update("brandName", e.target.value)} />
+              <Input value={form.brandName} maxLength={LIMITS.BRAND} onChange={e => update("brandName", e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Phone</Label>
@@ -213,15 +259,15 @@ const SettingsPage = () => {
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input value={form.email} onChange={e => update("email", e.target.value)} />
+              <Input value={form.email} maxLength={254} onChange={e => update("email", e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>PAN Card Number</Label>
-              <Input value={form.panNumber} onChange={e => update("panNumber", e.target.value.toUpperCase())} className="uppercase" />
+              <Input value={form.panNumber} maxLength={10} onChange={e => update("panNumber", e.target.value.toUpperCase())} className="uppercase" />
             </div>
             <div className="space-y-2">
               <Label>GST Number</Label>
-              <Input value={form.gstNumber} onChange={e => update("gstNumber", e.target.value.toUpperCase())} className="uppercase" />
+              <Input value={form.gstNumber} maxLength={15} onChange={e => update("gstNumber", e.target.value.toUpperCase())} className="uppercase" />
             </div>
             <div className="space-y-2">
               <Label>Business Type</Label>
@@ -261,23 +307,26 @@ const SettingsPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2 sm:col-span-2">
                 <Label>Street</Label>
-                <Input value={form.street} onChange={e => update("street", e.target.value)} />
+                <Input value={form.street} maxLength={LIMITS.STREET} onChange={e => update("street", e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>City</Label>
-                <Input value={form.city} onChange={e => update("city", e.target.value)} />
+                <Input value={form.city} maxLength={LIMITS.CITY} onChange={e => update("city", e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>State</Label>
-                <Input value={form.state} onChange={e => update("state", e.target.value)} />
+                <Input value={form.state} maxLength={LIMITS.STATE} onChange={e => update("state", e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>Pincode</Label>
-                <Input value={form.pincode} onChange={e => update("pincode", e.target.value)} />
+                <Input value={form.pincode} maxLength={LIMITS.PINCODE} onKeyDown={e => {
+                  if (['.', 'e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+                  if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+                }} onChange={e => update("pincode", e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>Country</Label>
-                <Input value={form.country} onChange={e => update("country", e.target.value)} />
+                <Input value={form.country} maxLength={LIMITS.STATE} onChange={e => update("country", e.target.value)} />
               </div>
             </div>
           </div>
@@ -287,23 +336,27 @@ const SettingsPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Account Holder Name</Label>
-                <Input value={form.accountHolderName} onChange={e => update("accountHolderName", e.target.value)} />
+                <Input value={form.accountHolderName} maxLength={LIMITS.ACC_NAME} 
+                  onKeyDown={e => { if (/^\d$/.test(e.key)) e.preventDefault(); }}
+                  onChange={e => update("accountHolderName", e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>Bank Name</Label>
-                <Input value={form.bankName} onChange={e => update("bankName", e.target.value)} />
+                <Input value={form.bankName} maxLength={LIMITS.BANK} onChange={e => update("bankName", e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>Account Number</Label>
-                <Input value={form.accountNumber} onChange={e => update("accountNumber", e.target.value)} />
+                <Input value={form.accountNumber} maxLength={LIMITS.ACC_NUM_MAX} 
+                  onKeyDown={e => { if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault(); }}
+                  onChange={e => update("accountNumber", e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>IFSC Code</Label>
-                <Input value={form.ifscCode} onChange={e => update("ifscCode", e.target.value)} />
+                <Input value={form.ifscCode} maxLength={11} className="uppercase" onChange={e => update("ifscCode", e.target.value.toUpperCase())} />
               </div>
               <div className="space-y-2">
                 <Label>UPI ID</Label>
-                <Input value={form.upiId} placeholder="e.g. username@bank" onChange={e => update("upiId", e.target.value)} />
+                <Input value={form.upiId} maxLength={LIMITS.UPI} placeholder="e.g. username@bank" onChange={e => update("upiId", e.target.value)} />
               </div>
             </div>
           </div>

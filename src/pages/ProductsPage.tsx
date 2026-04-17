@@ -25,6 +25,13 @@ const categoryColors: Record<string, string> = {
 
 const units = ["vial", "bag", "piece", "bottle", "box", "kg", "litre"];
 
+const LIMITS = {
+  NAME: 100,
+  BRAND: 50,
+  DESC: 500,
+  MIN_NAME: 3
+};
+
 const emptyForm = { name: "", category: "vaccine" as ProductCategory, brand: "", description: "", quantity: 0, unit: "piece", price: 0 };
 
 type ImagePreview =
@@ -126,8 +133,12 @@ const ProductsPage = () => {
   };
 
   const handleSave = async () => {
-    if (!form.name.trim()) { toast.error("Product name is required"); return; }
+    if (!form.name.trim() || form.name.trim().length < LIMITS.MIN_NAME) { 
+      toast.error(`Product name must be at least ${LIMITS.MIN_NAME} characters`); 
+      return; 
+    }
     if (form.price <= 0) { toast.error("Price must be greater than 0"); return; }
+    if (form.quantity < 0) { toast.error("Quantity cannot be negative"); return; }
     if (saving) return;
 
     try {
@@ -313,10 +324,14 @@ const ProductsPage = () => {
                   <Label className="text-sm font-semibold text-slate-700">Product Name *</Label>
                   <Input
                     value={form.name}
+                    maxLength={LIMITS.NAME}
                     onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                     className="h-11 border-slate-200 focus:border-primary focus:ring-primary/20 bg-white"
                     placeholder="e.g. Premium Dog Food"
                   />
+                  {form.name && form.name.length < LIMITS.MIN_NAME && (
+                    <p className="text-[10px] text-destructive">Minimum {LIMITS.MIN_NAME} characters required</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-6">
@@ -339,6 +354,7 @@ const ProductsPage = () => {
                     <Label className="text-sm font-semibold text-slate-700">Brand Name</Label>
                     <Input
                       value={form.brand}
+                      maxLength={LIMITS.BRAND}
                       onChange={e => setForm(f => ({ ...f, brand: e.target.value }))}
                       className="h-11 border-slate-200 bg-white"
                       placeholder="e.g. Royal Canin"
@@ -347,9 +363,13 @@ const ProductsPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm font-semibold text-slate-700">Description</Label>
+                  <div className="flex justify-between items-center">
+                    <Label className="text-sm font-semibold text-slate-700">Description</Label>
+                    <span className="text-[10px] text-muted-foreground">{form.description?.length || 0} / {LIMITS.DESC}</span>
+                  </div>
                   <Textarea
                     value={form.description}
+                    maxLength={LIMITS.DESC}
                     onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                     className="min-h-[120px] resize-none border-slate-200 bg-white"
                     placeholder="Enter product details..."
@@ -377,6 +397,9 @@ const ProductsPage = () => {
                       <Input
                         type="number"
                         value={form.price}
+                        onKeyDown={e => {
+                          if (['e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+                        }}
                         onChange={e => setForm(f => ({ ...f, price: Number(e.target.value) }))}
                         className="h-10 border-slate-200 font-semibold text-primary"
                       />
@@ -387,7 +410,17 @@ const ProductsPage = () => {
                     <Input
                       type="number"
                       value={form.quantity}
-                      onChange={e => setForm(f => ({ ...f, quantity: Number(e.target.value) }))}
+                      min={0}
+                      step="1"
+                      onKeyDown={e => {
+                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+                      }}
+                      onChange={e => {
+                        const val = e.target.value;
+                        if (val === "" || /^\d+$/.test(val)) {
+                          setForm(f => ({ ...f, quantity: Number(val) }));
+                        }
+                      }}
                       className="h-10 border-slate-200"
                     />
                   </div>

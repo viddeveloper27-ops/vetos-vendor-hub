@@ -88,11 +88,16 @@ const LoginPage = () => {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="+91 00000 00000"
+                    placeholder="10-digit mobile number"
+                    maxLength={10}
                     className="h-12 border-muted-foreground/20 focus:border-primary focus:ring-primary/20 bg-white"
                     value={phone}
+                    onKeyDown={e => {
+                      if (['.', 'e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+                      if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+                      if (e.key === "Enter") handleSendOtp();
+                    }}
                     onChange={e => setPhone(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && handleSendOtp()}
                   />
                 </div>
                 <Button className="w-full h-12 text-base font-semibold shadow-md active:scale-95 transition-transform" onClick={handleSendOtp} disabled={loading}>
@@ -110,12 +115,17 @@ const LoginPage = () => {
                   <Label htmlFor="otp" className="text-sm font-semibold">Enter OTP</Label>
                   <Input
                     id="otp"
-                    placeholder="Enter 4-digit OTP"
+                    type="tel"
+                    placeholder="4-digit OTP"
                     maxLength={4}
-                    className="h-12 border-muted-foreground/20 focus:border-primary focus:ring-primary/20 text-center text-xl tracking-widest bg-white"
+                    className="h-12 border-muted-foreground/20 focus:border-primary focus:ring-primary/20 text-center text-xl tracking-widest bg-white font-bold"
                     value={otp}
+                    onKeyDown={e => {
+                      if (['.', 'e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+                      if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+                      if (e.key === "Enter") handleVerifyOtp();
+                    }}
                     onChange={e => setOtp(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && handleVerifyOtp()}
                   />
                 </div>
                 <Button className="w-full h-12 text-base font-semibold shadow-md active:scale-95 transition-transform" onClick={handleVerifyOtp} disabled={loading}>

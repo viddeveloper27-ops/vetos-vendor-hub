@@ -19,6 +19,28 @@ const STEPS = [
 import { ImagePlus, X, Camera } from "lucide-react";
 import { useRef } from "react";
 
+const REGEX = {
+  EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  PAN: /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/,
+  IFSC: /^[A-Z]{4}0[A-Z0-9]{6}$/,
+  GST: /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/,
+  UPI: /^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/,
+  PHONE: /^[6789]\d{9}$/
+};
+
+const LIMITS = {
+  NAME: 100,
+  BRAND: 50,
+  ACC_NAME: 100,
+  ACC_NUM_MIN: 9,
+  ACC_NUM_MAX: 18,
+  BANK: 50,
+  UPI: 50,
+  STREET: 200,
+  CITY: 50,
+  PINCODE: 6
+};
+
 const RegisterPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -53,60 +75,34 @@ const RegisterPage = () => {
   const nextStep = () => {
     // Basic validation for each step
     if (step === 1) {
-      if (!form.name.trim() || !form.legalName.trim()) {
-        toast.error("Business name and Legal name are required");
-        return;
-      }
+      if (!form.name.trim() || form.name.trim().length < 3) { toast.error("Public store name must be at least 3 characters"); return; }
+      if (!form.legalName.trim() || form.legalName.trim().length < 3) { toast.error("Legal name must be at least 3 characters"); return; }
     } else if (step === 2) {
-      if (!form.phone.trim() || !form.email.trim()) {
-        toast.error("Phone and Email are required");
-        return;
-      }
+      if (!form.phone.trim()) { toast.error("Phone number is required"); return; }
+      if (!REGEX.PHONE.test(form.phone.trim())) { toast.error("Please enter a valid 10-digit mobile number starting with 6-9"); return; }
+      
+      if (!form.email.trim()) { toast.error("Business email is required"); return; }
+      if (!REGEX.EMAIL.test(form.email.trim())) { toast.error("Please enter a valid email address"); return; }
 
-      // Phone validation (10 digits starting with 6-9)
-      const phoneRegex = /^[6789]\d{9}$/;
-      if (!phoneRegex.test(form.phone.trim())) {
-        toast.error("Please enter a valid 10-digit mobile number");
-        return;
-      }
+      if (!form.panNumber.trim()) { toast.error("PAN number is required"); return; }
+      if (!REGEX.PAN.test(form.panNumber.trim().toUpperCase())) { toast.error("Please enter a valid PAN number (e.g., ABCDE1234F)"); return; }
 
-      // Email validation
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(form.email.trim())) {
-        toast.error("Please enter a valid email address");
+      if (form.gstNumber.trim() && !REGEX.GST.test(form.gstNumber.trim().toUpperCase())) {
+        toast.error("Please enter a valid GST number");
         return;
-      }
-
-      if (!form.panNumber.trim()) {
-        toast.error("PAN number is required for verification");
-        return;
-      }
-
-      // PAN validation
-      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-      if (!panRegex.test(form.panNumber.trim().toUpperCase())) {
-        toast.error("Please enter a valid PAN number (e.g., ABCDE1234F)");
-        return;
-      }
-
-      // GST validation (Optional)
-      if (form.gstNumber.trim()) {
-        const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-        if (!gstRegex.test(form.gstNumber.trim().toUpperCase())) {
-          toast.error("Please enter a valid GST number");
-          return;
-        }
       }
     } else if (step === 3) {
-      if (!form.accountNumber.trim() || !form.ifscCode.trim()) {
-        toast.error("Bank account details are required for settlements");
+      if (!form.accountNumber.trim()) { toast.error("Account number is required"); return; }
+      if (form.accountNumber.length < LIMITS.ACC_NUM_MIN || form.accountNumber.length > LIMITS.ACC_NUM_MAX) {
+        toast.error(`Account number must be between ${LIMITS.ACC_NUM_MIN} and ${LIMITS.ACC_NUM_MAX} digits`);
         return;
       }
+      
+      if (!form.ifscCode.trim()) { toast.error("IFSC code is required"); return; }
+      if (!REGEX.IFSC.test(form.ifscCode.trim().toUpperCase())) { toast.error("Please enter a valid 11-digit IFSC code"); return; }
 
-      // IFSC validation
-      const ifscRegex = /^[A-Z]{4}0[A-Z0-9]{6}$/;
-      if (!ifscRegex.test(form.ifscCode.trim().toUpperCase())) {
-        toast.error("Please enter a valid IFSC code (e.g., HDFC0001234)");
+      if (form.upiId.trim() && !REGEX.UPI.test(form.upiId.trim())) {
+        toast.error("Please enter a valid UPI ID (e.g., name@bank)");
         return;
       }
     }
@@ -116,14 +112,12 @@ const RegisterPage = () => {
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
   const handleSubmit = async () => {
-    if (!form.street.trim() || !form.city.trim() || !form.pincode.trim()) {
+    if (!form.street.trim() || !form.city.trim() || !form.state.trim() || !form.pincode.trim()) {
       toast.error("Please fill complete address details");
       return;
     }
 
-    // Pincode validation
-    const pincodeRegex = /^\d{6}$/;
-    if (!pincodeRegex.test(form.pincode.trim())) {
+    if (!/^\d{6}$/.test(form.pincode.trim())) {
       toast.error("Please enter a valid 6-digit pincode");
       return;
     }
@@ -294,11 +288,16 @@ const RegisterPage = () => {
                   </div>
                   <div className="space-y-2">
                     <Label>Public Store Name *</Label>
-                    <Input placeholder="e.g. Pawsome Pet Store" value={form.name} onChange={e => update("name", e.target.value)} />
+                    <Input placeholder="e.g. Pawsome Pet Store" value={form.name} maxLength={LIMITS.NAME} 
+                      onKeyDown={e => { if (/^\d$/.test(e.key)) e.preventDefault(); }}
+                      onChange={e => update("name", e.target.value)} />
+                    {form.name && form.name.length < 3 && <p className="text-[10px] text-destructive">Minimum 3 characters required</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>Legal Registered Name *</Label>
-                    <Input placeholder="e.g. Pawsome Retail Pvt Ltd" value={form.legalName} onChange={e => update("legalName", e.target.value)} />
+                    <Input placeholder="e.g. Pawsome Retail Pvt Ltd" value={form.legalName} maxLength={LIMITS.NAME} 
+                      onChange={e => update("legalName", e.target.value)} />
+                    {form.name && form.name.length < 3 && <p className="text-[10px] text-destructive">Minimum 3 characters required</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>Business Type</Label>
@@ -337,19 +336,26 @@ const RegisterPage = () => {
                 <>
                   <div className="space-y-2">
                     <Label>Primary Phone *</Label>
-                    <Input placeholder="10 digit mobile" value={form.phone} onChange={e => update("phone", e.target.value)} />
+                    <Input placeholder="10 digit mobile" value={form.phone} maxLength={10}
+                      onKeyDown={e => {
+                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+                        if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+                      }}
+                      onChange={e => update("phone", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Business Email *</Label>
-                    <Input type="email" placeholder="email@business.com" value={form.email} onChange={e => update("email", e.target.value)} />
+                    <Input type="email" placeholder="email@business.com" value={form.email} maxLength={254} onChange={e => update("email", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>PAN Card Number *</Label>
-                    <Input placeholder="ABCDE1234F" className="uppercase" value={form.panNumber} onChange={e => update("panNumber", e.target.value)} />
+                    <Input placeholder="ABCDE1234F" className="uppercase" value={form.panNumber} maxLength={10} 
+                      onChange={e => update("panNumber", e.target.value.toUpperCase())} />
                   </div>
                   <div className="space-y-2">
                     <Label>GST Number (Optional)</Label>
-                    <Input placeholder="22AAAAA0000A1Z5" className="uppercase" value={form.gstNumber} onChange={e => update("gstNumber", e.target.value)} />
+                    <Input placeholder="22AAAAA0000A1Z5" className="uppercase" value={form.gstNumber} maxLength={15}
+                      onChange={e => update("gstNumber", e.target.value.toUpperCase())} />
                   </div>
                 </>
               )}
@@ -358,23 +364,28 @@ const RegisterPage = () => {
                 <>
                   <div className="space-y-2">
                     <Label>Account Holder Name *</Label>
-                    <Input placeholder="Name as per bank records" value={form.accountHolderName} onChange={e => update("accountHolderName", e.target.value)} />
+                    <Input placeholder="Name as per bank records" value={form.accountHolderName} maxLength={LIMITS.ACC_NAME}
+                      onKeyDown={e => { if (/^\d$/.test(e.key)) e.preventDefault(); }}
+                      onChange={e => update("accountHolderName", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Bank Account Number *</Label>
-                    <Input placeholder="Enter savings/current A/C No" value={form.accountNumber} onChange={e => update("accountNumber", e.target.value)} />
+                    <Input placeholder="Enter savings/current A/C No" value={form.accountNumber} maxLength={LIMITS.ACC_NUM_MAX}
+                      onKeyDown={e => { if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault(); }}
+                      onChange={e => update("accountNumber", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Bank Name *</Label>
-                    <Input placeholder="e.g. HDFC Bank" value={form.bankName} onChange={e => update("bankName", e.target.value)} />
+                    <Input placeholder="e.g. HDFC Bank" value={form.bankName} maxLength={LIMITS.BANK} onChange={e => update("bankName", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>IFSC Code *</Label>
-                    <Input placeholder="HDFC0001234" className="uppercase" value={form.ifscCode} onChange={e => update("ifscCode", e.target.value)} />
+                    <Input placeholder="HDFC0001234" className="uppercase" value={form.ifscCode} maxLength={11}
+                      onChange={e => update("ifscCode", e.target.value.toUpperCase())} />
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label>UPI ID (For fast settlements)</Label>
-                    <Input placeholder="username@bank" value={form.upiId} onChange={e => update("upiId", e.target.value)} />
+                    <Input placeholder="username@bank" value={form.upiId} maxLength={LIMITS.UPI} onChange={e => update("upiId", e.target.value)} />
                   </div>
                 </>
               )}
@@ -383,23 +394,28 @@ const RegisterPage = () => {
                 <>
                   <div className="space-y-2 md:col-span-2">
                     <Label>Registered Street Address *</Label>
-                    <Input placeholder="Apt No, Building, Street" value={form.street} onChange={e => update("street", e.target.value)} />
+                    <Input placeholder="Apt No, Building, Street" value={form.street} maxLength={LIMITS.STREET} onChange={e => update("street", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>City *</Label>
-                    <Input placeholder="City" value={form.city} onChange={e => update("city", e.target.value)} />
+                    <Input placeholder="City" value={form.city} maxLength={LIMITS.CITY} onChange={e => update("city", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>State *</Label>
-                    <Input placeholder="State" value={form.state} onChange={e => update("state", e.target.value)} />
+                    <Input placeholder="State" value={form.state} maxLength={LIMITS.CITY} onChange={e => update("state", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Pincode *</Label>
-                    <Input placeholder="6 digit code" value={form.pincode} onChange={e => update("pincode", e.target.value)} />
+                    <Input placeholder="6 digit code" value={form.pincode} maxLength={6}
+                      onKeyDown={e => {
+                        if (['.', 'e', 'E', '+', '-'].includes(e.key)) e.preventDefault();
+                        if (e.key.length === 1 && !/\d/.test(e.key)) e.preventDefault();
+                      }}
+                      onChange={e => update("pincode", e.target.value)} />
                   </div>
                   <div className="space-y-2">
                     <Label>Country</Label>
-                    <Input value={form.country} disabled />
+                    <Input value={form.country} disabled className="bg-slate-50" />
                   </div>
                 </>
               )}
