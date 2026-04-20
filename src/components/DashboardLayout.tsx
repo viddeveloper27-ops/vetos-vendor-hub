@@ -157,7 +157,7 @@ const DashboardLayout = () => {
       };
 
       const unsubscribeFCM = onMessageListener(handleNotification);
-      
+
       const handleNativeMessage = (e: any) => {
         handleNotification(e.detail);
       };
@@ -194,7 +194,7 @@ const DashboardLayout = () => {
           <header className="sticky top-0 z-30 h-16 flex items-center justify-between bg-primary text-primary-foreground px-4 shrink-0 shadow-md">
             <div className="flex items-center gap-3">
               {showBackButton && (
-                <button 
+                <button
                   onClick={() => navigate(-1)}
                   className="p-2 rounded-full hover:bg-white/20 transition-colors"
                 >
@@ -207,13 +207,12 @@ const DashboardLayout = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <button className="relative p-2 rounded-full hover:bg-white/10 transition-colors">
+              {/* <button className="relative p-2 rounded-full hover:bg-white/10 transition-colors">
                 <Bell className="h-6 w-6 text-white" />
-                {/* Notification marker - only show if there are new alerts */}
-                {/* <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-white rounded-full border-2 border-primary shadow-sm" /> */}
-              </button>
+                <span className="absolute top-1.5 right-1.5 h-2.5 w-2.5 bg-white rounded-full border-2 border-primary shadow-sm" />
+              </button> */}
 
-              <button 
+              <button
                 onClick={() => navigate("/profile")}
                 className="flex items-center sm:gap-2 p-1 sm:pr-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-all active:scale-95"
               >
